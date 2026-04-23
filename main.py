@@ -21,7 +21,8 @@ from rendering.user_input import handle_input
 pygame.init()
 config.init()
 
-pygame.display.set_caption("Simulació de partícules amb anotacions estroboscòpiques")
+pygame.display.set_caption("2D simulation with stroboscopic view")
+#pygame.display.set_caption("Simulació de partícules amb anotacions estroboscòpiques")
 font = pygame.font.SysFont(None, 28)
 
 screen = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
@@ -84,7 +85,8 @@ dt_sim = config.SIM_DT_PARAM * min(
     r_min / v_max if v_max > 0 else float('inf'),       math.sqrt(r_min / a_max) if a_max > 0 else float('inf')     )
 
 DT = dt_sim                         # Guarda aquest temps per quan fas pausa                 
-print(f"Pas de temps de simulació {dt_sim:.3e} (1/{int(1/dt_sim)})")
+print(f"Simulation time step {dt_sim:.3e} (1/{int(1/dt_sim)})")
+#print(f"Pas de temps de simulació {dt_sim:.3e} (1/{int(1/dt_sim)})")
 ##################
 
 
@@ -112,10 +114,11 @@ while running:
 
         #if paused:
         if state["paused"]:
-            pygame.display.set_caption(f"Simulació de partícules amb anotacions estroboscòpiques |  Pausa")
+#            pygame.display.set_caption(f"Simulació 2D de partícules amb anotacions estroboscòpiques |  Pausa")
+            pygame.display.set_caption(f"2D simulation with stroboscopic view |  Pause")
             dt_sim = 0
         else:
-            pygame.display.set_caption(f"Simulació de partícules amb anotacions estroboscòpiques")
+            pygame.display.set_caption(f"2D simulation with stroboscopic view")
             dt_sim = DT
         if state["r_screen_clear"]:
 #            sampler.data.clear()               # Esborra tots els punts "estroboscòpics"
@@ -132,7 +135,8 @@ while running:
         running = world.update(dt_sim)
         if not running:
             running = False
-            print("Fora de limits: surt")
+#            print("Fora de limits: surt")
+            print("Out of limits: surt")
             continue        
     else:
         continue
