@@ -11,13 +11,13 @@ HEIGHT = None
 LEFT_WIDTH = None
 RIGHT_WIDTH = None
 
-# Per la visualització:
+# Visualization parameters:
 TYPICAL_DIST = 50
 TYPICAL_VEL = 10
 
-# Mides de les finestres de la visualització de la simulació
-LEFT_PERCENTAGE = 0.5     # Percentatge de la amplada de la pantalla que es fa servir per visualitzar el "món" (pantalla de la esquerra)
-HIGHT_PERCENTAGE = 0.7    # Percentatge de la alçada de la pantalla que es fa servir
+# Window layout (simulation display)
+LEFT_PERCENTAGE = 0.5     # Fraction of screen width used for the "world" (left panel)
+HIGHT_PERCENTAGE = 0.7    # Fraction of screen height used
 LEFT_X = 0
 LEFT_Y = 0
 
@@ -26,32 +26,32 @@ RIGHT_Y = 0
 RIGHT_VX = 0
 RIGHT_VY = 0
 
-# Paràmetres de visualització general
+# General visualization parameters
 FPS = 60             
-DT_SAMPLE = 2.            # Temps real (no de simulació) entre flaxos estroboscòpics
-DT_FLASH = 0.1            # Duració en temps real del flaix
-PARTICLE_RAD = 0.1        # Radi del les partícules a la pantalla, no es un paràmetre físic. Veure draw.py (ara en desús)
+DT_SAMPLE = 2.            # Real time between stroboscopic snapshots
+DT_FLASH = 0.1            # Duration of the flash (real time)
+PARTICLE_RAD = 0.1        # Particle radius on screen (not physical). See draw.py (currently unused)
 
-# Configuració de les partícules:
-PART_CFR = 0.1            # Radi de les forces de contacte (en unitats de càlcul)
-PART_CR = 1.             # coeficient de restitució (0 = inelàstic, 1 = elàstic)
-PART_COLL = True         # Col.lisions amb coef. de restitució PART_CR permès sí (True) o no (False).
-PART_FUS_VTHRE = 2.      # Velocitat relativa per fusionar dues partícules  -> amb gravetat fem servir la condició amb E_rel
+# Particle configuration:
+PART_CFR = 0.1            # Contact interaction radius (in simulation units)
+PART_CR = 1.              # Coefficient of restitution (0 = inelastic, 1 = elastic)
+PART_COLL = True          # Enable/disable collisions
+PART_FUS_VTHRE = 2.       # Relative velocity threshold for fusion (with gravity, relative energy condition is used instead)
 
-# Configuració del "món":
-INTEGRATOR = "verlet"     # Integradors : "euler", "cromer", "verlet"   (de pitjors a millors).
-SIM_DT_PARAM = 0.02        # Aquest paràmetre controla el pas del temps als càlculs de la simulació: +petit = pas més curt
+# "World" configuration:
+INTEGRATOR = "verlet"     # Integrators: "euler", "cromer", "verlet" (from worse to better)
+SIM_DT_PARAM = 0.02       # Simulation timestep factor (smaller means smaller timestep)
 
-GRAV_G = 4*100*math.pi**2      # Constant de la gravitació universal. Si G = 0 no hi ha gravetat
+GRAV_G = 4*100*math.pi**2    # Gravitational constant (G = 0 disables gravity)
 
-WALLS = False   # Si hi ha parets aleshores les partícules reboten: True or False
-BOUNDS = None   # = None o True
-                # BOUNDS = None -> Les partícules poden escapar la finestra de simulació
-                # BOUNDS = True -> Les partícules tenen la finestra de simulació com a límit. 
-                #                  Si hi ha parets (WALLS = True), les partícules reboten com si la finestra de simulació tingués parets.
-                #                  Si no n'hi ha (WALLS = False), la simulació s'atura quan una partícula surt de la finestra.
+WALLS = False    # If True, particles bounce off boundaries
+BOUNDS = None    # = None or True
+                 # BOUNDS = None -> particles can escape the simulation window
+                 # BOUNDS = True -> simulation window acts as boundary
+                 #   if WALLS = True → particles bounce
+                 #   if WALLS = False → simulation stops when a particle exits
 
-                # ATENCIÓ: WALLS = True && BOUNDS = None és equivalent a WALLS = False
+                 # NOTE: WALLS = True && BOUNDS = None is equivalent to WALLS = False
 
 def init():
     print("")
@@ -66,31 +66,31 @@ def init():
     LEFT_WIDTH = int(WIDTH * LEFT_PERCENTAGE)
     RIGHT_WIDTH = WIDTH - LEFT_WIDTH
 
-    # Zoom pantalla esquerra
-    LPIXELS_PER_UNIT = int(LEFT_WIDTH/(3*TYPICAL_DIST))   # 1 unitat de longitud en el càlculs, equival a PIXELS_PER_UNIT a la pantalla
+    # Left panel zoom
+    LPIXELS_PER_UNIT = int(LEFT_WIDTH/(3*TYPICAL_DIST))   # 1 simulation unit = this many screen pixels
     if LPIXELS_PER_UNIT < 1:
-        print("ATENCIÓ:  LPIXELS_PER_UNIT fixat a 1")
+        print("WARNING:  LPIXELS_PER_UNIT set to 1")
         LPIXELS_PER_UNIT = 1
 
-    # Zoom pantalla dreta posicions
+    # Right panel zoom (positions)
     RPIXELS_PER_UNIT = int(RIGHT_WIDTH/(6*TYPICAL_DIST))
     if RPIXELS_PER_UNIT < 1:
-        print("ATENCIÓ:  RPIXELS_PER_UNIT fixat a 1")
+        print("WARNING:  RPIXELS_PER_UNIT set to 1")
         RPIXELS_PER_UNIT = 1
     RIGHT_X = RIGHT_WIDTH // 4
 
-    # Zoom pantalla dreta velocitats
+    # Right panel zoom (velocities)
     RPIXELS_PER_UNIT_V = int(RIGHT_WIDTH/(5*TYPICAL_VEL))
     if RPIXELS_PER_UNIT_V < 1:
-        print("ATENCIÓ:  RPIXELS_PER_UNIT (velocitats) fixat a 1")
+        print("WARNING:  RPIXELS_PER_UNIT (velocities) set to 1")
         RPIXELS_PER_UNIT_V = 1
     RIGHT_VX = RIGHT_WIDTH // 2 
     RIGHT_VY = 3* HEIGHT // 4
 
-    # Grandaria de les particules (en desus)
+    # Particle display size (deprecated)
     PARTICLE_RAD = int(PART_CFR * LPIXELS_PER_UNIT)
     if PARTICLE_RAD < 1:
-        print("PART_CFR massa petit pel que es pot veure per pantalla: PARTICLE_RAD fixat a 1")
+        print("PART_CFR too small to be visible: PARTICLE_RAD set to 1")
         PARTICLE_RAD = 1
 
 
