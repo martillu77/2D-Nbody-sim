@@ -46,7 +46,9 @@ def draw_plots(surface, SamplerDatasets, font):
 
     t = pygame.time.get_ticks()
     colour = (255,255,255) if (t // 500) % 2 else (0,0,0)
-    pygame.draw.circle(surface, colour, (config.RIGHT_X, config.RIGHT_Y), 2)
+#    pygame.draw.circle(surface, colour, (config.RIGHT_X, config.RIGHT_Y), 2)
+    pygame.draw.circle(surface, colour, (int(2*config.RIGHT_X + (10/11)*config.RPIXELS_PER_UNIT)+5, config.HEIGHT//4), 2)
+    
     pygame.draw.circle(surface, colour,  (   c_vx  * config.RPIXELS_PER_UNIT_V + config.RIGHT_VX,     c_vy  * config.RPIXELS_PER_UNIT_V + config.RIGHT_VY), 2)
     pygame.draw.circle(surface, colour, ((1+c_vx) * config.RPIXELS_PER_UNIT_V + config.RIGHT_VX , (1+c_vy) * config.RPIXELS_PER_UNIT_V + config.RIGHT_VY), 2)
 

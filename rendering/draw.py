@@ -13,7 +13,6 @@ def draw_particles(left_surface, particles):
 
     #print("draw ", config.LEFT_X, " ", config.LPIXELS_PER_UNIT)
     for particle_idx, p in enumerate(particles):
-        #x, y = particle
         x_screen = int(p.x * config.LPIXELS_PER_UNIT + config.LEFT_X)
         y_screen = int(p.y * config.LPIXELS_PER_UNIT + config.LEFT_Y) # + (config.HEIGHT // 2)
 

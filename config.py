@@ -12,13 +12,14 @@ LEFT_WIDTH = None
 RIGHT_WIDTH = None
 
 # Visualization parameters:
-TYPICAL_DIST = 50
-TYPICAL_VEL = 10
+                     # 1 vs 100
+TYPICAL_DIST = 0.023 #    5
+TYPICAL_VEL =  1     #  150
 
 # Window layout (simulation display)
 LEFT_PERCENTAGE = 0.5     # Fraction of screen width used for the "world" (left panel)
 HIGHT_PERCENTAGE = 0.7    # Fraction of screen height used
-LEFT_X = 0
+LEFT_X = -350
 LEFT_Y = 0
 
 RIGHT_X = 0
@@ -28,7 +29,7 @@ RIGHT_VY = 0
 
 # General visualization parameters
 FPS = 60             
-DT_SAMPLE = 2.            # Real time between stroboscopic snapshots
+DT_SAMPLE = 1.            # Real time between stroboscopic snapshots
 DT_FLASH = 0.1            # Duration of the flash (real time)
 PARTICLE_RAD = 0.1        # Particle radius on screen (not physical). See draw.py (currently unused)
 
@@ -39,8 +40,8 @@ PART_COLL = True          # Enable/disable collisions
 PART_FUS_VTHRE = 2.       # Relative velocity threshold for fusion (with gravity, relative energy condition is used instead)
 
 # "World" configuration:
-INTEGRATOR = "verlet"     # Integrators: "euler", "cromer", "verlet" (from worse to better)
-SIM_DT_PARAM = 0.02       # Simulation timestep factor (smaller means smaller timestep)
+INTEGRATOR = "verlet"     # Integrators (from worse to better): "euler", "cromer", "verlet" 
+SIM_DT_PARAM = 30000.       # Simulation timestep factor (smaller means smaller timestep)
 
 GRAV_G = 4*100*math.pi**2    # Gravitational constant (G = 0 disables gravity)
 

@@ -24,19 +24,35 @@ def handle_input(event, state):
         elif event.key == pygame.K_ESCAPE:  # ESC per sortir
             return False  # aturar simulació
 
-
-        if event.key == pygame.K_LEFT:
-            config.LEFT_X -= 10
-        elif event.key == pygame.K_RIGHT:
-            config.LEFT_X += 10
-        elif event.key == pygame.K_UP:
-            config.LEFT_Y -= 10
-        elif event.key == pygame.K_DOWN:
-            config.LEFT_Y += 10
-
-
         if event.key == pygame.K_g:
             state["g_pressed"] = True
+            
+        if event.key == pygame.K_r:
+            state["r_pressed"] = True
+
+
+        if event.key == pygame.K_LEFT:
+            if not state["r_pressed"]:
+                config.LEFT_X -= 10
+            else:
+                config.RIGHT_X -= 10
+        elif event.key == pygame.K_RIGHT:
+            if not state["r_pressed"]:
+                config.LEFT_X += 10
+            else:
+                config.RIGHT_X += 10
+        elif event.key == pygame.K_UP:
+            if not state["r_pressed"]:
+                config.LEFT_Y -= 10
+            else:
+                config.RIGHT_Y -= 10
+        elif event.key == pygame.K_DOWN:
+            if not state["r_pressed"]:
+                config.LEFT_Y += 10
+            else:
+                config.RIGHT_Y += 10
+
+            
 
 ########################
 ####    Pantalla esquerra
@@ -63,9 +79,9 @@ def handle_input(event, state):
 ####    Pantalla dreta
 ####
 ####        Posicions:
-        if event.key == pygame.K_u or event.key == pygame.K_m:    # Tecla "u" Zoom in       # Tecla "m" Zoom out
+        if event.key == pygame.K_y or event.key == pygame.K_n:    # Tecla "y" Zoom in       # Tecla "n" Zoom out
             factor = 10 if state["g_pressed"] else 1.1
-            if event.key == pygame.K_u:
+            if event.key == pygame.K_y:
                 config.RPIXELS_PER_UNIT *= factor
             else:
                 config.RPIXELS_PER_UNIT /= factor
@@ -77,9 +93,9 @@ def handle_input(event, state):
             print(f"RPIXELS_PER_UNIT: {config.RPIXELS_PER_UNIT} {config.RIGHT_X} {config.RIGHT_Y}")
 
 ####        Velocitats:
-        if event.key == pygame.K_i or event.key == pygame.K_l:    # Tecla "i" Zoom in       # Tecla "l" Zoom out
+        if event.key == pygame.K_u or event.key == pygame.K_m:    # Tecla "u" Zoom in       # Tecla "m" Zoom out
             factor = 10 if state["g_pressed"] else 1.1
-            if event.key == pygame.K_i:
+            if event.key == pygame.K_u:
                 config.RPIXELS_PER_UNIT_V *= factor
             else:
                 config.RPIXELS_PER_UNIT_V /= factor
@@ -96,6 +112,12 @@ def handle_input(event, state):
     if event.type == pygame.KEYUP:
         if event.key == pygame.K_g:      # Els Zooms magnifiquen en un factor x10 més
             state["g_pressed"] = False
+            
+    if event.type == pygame.KEYUP:
+        if event.key == pygame.K_r:      # Les fletxes mouen la representació posició de la pantalla dreta
+            state["r_pressed"] = False
+            
+            
 
     return True
 

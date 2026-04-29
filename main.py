@@ -39,26 +39,43 @@ mid_y = config.HEIGHT/(2*config.LPIXELS_PER_UNIT)
 
 
 # Genera un disc de N particules dins d'un radi donat i petita rotació global (òmega):
-particles = Particle.generate_disk(N=200, center=(mid_x, mid_y), R=50, omega=0.2)
+#particles = Particle.generate_disk(N=400, center=(mid_x, mid_y), R=50, omega=0.2)
 
 
 
 # Partícules amb velocitats inicials i acceleracions
-##particles = [
-##    Particle(x=mid_x,       y=mid_y, vx=0, vy=0.,                               m=1),         # Sol
-#    Particle(x=mid_x+3.9,   y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/3.9),     m=1.65e-7),   # Mercuri
-##    Particle(x=mid_x+11.,   y=mid_y, vx=2, vy=0,   m=2),   # Venus
-#    Particle(x=mid_x+10.0,  y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/10.0),    m=1),    # Terra
-#    Particle(x=mid_x+10.0,  y=mid_y, vx=0, vy=math.sqrt(1200/10.0),    m=3.0e-6),
-#    Particle(x=mid_x+15.2,  y=mid_y, vx=0, vy=math.sqrt(1200/15.2),    m=3.2e-7)
-##]
+#particles = [
+#    Particle(x=mid_x,       y=mid_y, vx=0, vy=1.,  m=100),         # Sol
+#    Particle(x=mid_x+11.,   y=mid_y, vx=0, vy=-100,  m=1),         # Venus
+##    Particle(x=mid_x,       y=mid_y, vx=0, vy=7.5,  m=2),         # Sol
+##    Particle(x=mid_x+11.,   y=mid_y, vx=0, vy=-15,  m=1),         # Venus
+#]
+
+r0 = 0.002
+v_circ = math.sqrt(config.GRAV_G*3.0e-6/r0)
+v_esc  = math.sqrt(2*config.GRAV_G*3.0e-6/r0)
+
+v0 = 0.9672 * v_esc   # ajusta entre 0.9–1.0
+theta = 90.
+
+moon_dist = 0.0257
+moon_angle = 292.
+
+particles = [
+    Particle(x=mid_x,         y=mid_y,          vx=0,  vy=-(3.69e-8/3.0e-6)*math.sqrt(config.GRAV_G*3.0e-6/0.0257),   m=3.0e-6),    # Terra
+    Particle(x=mid_x+ moon_dist*math.cos(moon_angle*math.pi/180.0), y=mid_y+ moon_dist*math.sin(moon_angle*math.pi/180.0),  vx=-math.sqrt(config.GRAV_G*3.0e-6/moon_dist)*math.sin(moon_angle*math.pi/180.0), vy=math.sqrt(config.GRAV_G*3.0e-6/moon_dist)*math.cos(moon_angle*math.pi/180.0),  m=3.69e-8), # Lluna
+    Particle(x=mid_x-r0,         y=mid_y,       vx=v0*math.cos(theta*math.pi/180), vy=-v0*math.sin(theta*math.pi/180), m=1.0e-26)
+#    Particle(x=mid_x+r0,      y=mid_y,       vx=v0*math.cos(theta*math.pi/180), vy=v0*math.sin(theta*math.pi/180), m=1.0e-26)
+]
 
 # Sistema solar:
 #particles = [
-#    Particle(x=mid_x,       y=mid_y, vx=0, vy=0.,                               m=1),         # Sol
-#    Particle(x=mid_x+3.9,   y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/3.9),     m=1.65e-7),   # Mercuri
-#    Particle(x=mid_x+7.2,   y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/7.2),     m=2.45e-6),   # Venus
-#    Particle(x=mid_x+10.0,  y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/10.0),    m=3.0e-6),    # Terra
+#    Particle(x=mid_x,           y=mid_y, vx=0, vy=0.,                               m=1),         # Sol
+#    Particle(x=mid_x+3.9,       y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/3.9),     m=1.65e-7),   # Mercuri
+#    Particle(x=mid_x+7.2,       y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/7.2),     m=2.45e-6),   # Venus
+#    Particle(x=mid_x+10.0,      y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/10.0),    m=3.0e-6),    # Terra
+#    Particle(x=mid_x + 10.0257, y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/10.0) + math.sqrt(config.GRAV_G*3.0e-6/0.0257), m=3.69e-8) # Lluna
+#    Particle(x=mid_x+10.0,  y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/10.0),    m=0.0123*3.0e-6),    # Terra
 #    Particle(x=mid_x+15.2,  y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/15.2),    m=3.2e-7),    # Mart
 #    Particle(x=mid_x+52.0,  y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/52),      m=9.5e-4),    # Jupiter
 #    Particle(x=mid_x+95.8,  y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/95.8),    m=2.86e-4),   # Saturn
@@ -98,9 +115,10 @@ t = 0
 running = True
 
 state = {
-    "paused": False,
-    "g_pressed": False,
-    "r_screen_clear": False
+    "paused": False,             # Pausa a la simulació
+    "g_pressed": False,          # Magnifica el poder dels zooms
+    "r_pressed": False,          # Les fletxes mouen la representació posició de la pantalla dreta
+    "r_screen_clear": False      # Neteja els punts stroboscòpics de la pantalla dreta
 }
 
 while running:
