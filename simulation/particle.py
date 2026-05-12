@@ -11,7 +11,7 @@ import random
 
 # --- Física ---
 class Particle:
-    def __init__(self, x=0, y=0, vx=0, vy=0, ax=0, ay=0, m=0.0):
+    def __init__(self, x=0, y=0, vx=0, vy=0, ax=0, ay=0, m=0.0, cfr=config.PART_CFR):
         self.x = x     # posicio inicial, component x
         self.y = y     # posicio inicial, component y
         self.vx = vx   # velocitat inicial, component x
@@ -20,9 +20,9 @@ class Particle:
         self.ay = ay   # acceleracio constant propia, component y
         self.m = m     # massa
         self.cr = config.PART_CR               # coeficient de restitució (0 = inelàstic, 1 = elàstic)
-        self.cfr = (m**(1/3))*config.PART_CFR  # radi efectiu foces de contacte (en unitats de càlcul)  m ~ phro * dr^3 => dr ~ m^(1/3)
+        self.cfr = (m**(1/3))*cfr              # radi efectiu foces de contacte (en unitats de càlcul)  m ~ phro * dr^3 => dr ~ m^(1/3)
 
-        print(f"partícula de posició (x, y) = ({x}, {y}) velocitat (vx, vy) = ({vx}, {vy}) acceleració (ax, ay) = ({ax}, {ay}) i massa: {m}")
+        print(f"partícula de posició (x, y) = ({x}, {y}) velocitat (vx, vy) = ({vx:.3e}, {vy:.3e}) acceleració (ax, ay) = ({ax:.3e}, {ay:.3e}) massa: {m:.3e} cfr: {cfr:.3e}")
         
         
     @classmethod
@@ -31,7 +31,7 @@ class Particle:
         cx, cy = center
 
         v_max = 0.
-        particles.append(cls(cx, cy, 0.0, 0.0, m=10))   # llavor al centre
+        particles.append(cls(cx, cy, 0.0, 0.0, m=10, cfr=0.5e-1))   # llavor al centre
         for _ in range(N):
             # --- posició (disc uniforme en àrea) ---
             r = R * math.sqrt(random.random())
@@ -50,7 +50,7 @@ class Particle:
 
             v_max = max(v_max, math.sqrt(vx**2 + vy**2))
 
-            particles.append(cls(x, y, vx, vy, m=mass))
+            particles.append(cls(x, y, vx, vy, m=mass, cfr=0.5e-1))
 
         print("Velocitat màxima  generada: ", v_max)
         return particles

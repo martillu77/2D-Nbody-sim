@@ -11,7 +11,7 @@ class Sampler:
         self.dt_sample = dt_sample
         self.timer = 0
         self.t = 0
-        self.data = []    # [(t, x, y, vx), ...]
+        self.data = []    # [(t, x, y, vx, vy, E_kin...), ...]
 
     def trigger(self, dt, dt_real):
         self.timer += dt_real
@@ -48,6 +48,32 @@ class Sampler:
         self.data.append((self.t, snapshot, E_kin, Ep_grav, L_tot, m_max))
 
 
+    def downsample(self):
+        if not self.data:
+            return
 
+        newdata = []
+        d_min2 = 0.05**2
+
+        print("Prune stroboscopic view points!")
+        # primer punt sempre es queda
+        newdata.append(self.data[0])
+
+        for t, snapshot, E_kin, Ep_grav, L_tot, m_max in self.data[1:]:
+            tp, snapshotp, *_ = newdata[-1]
+
+            keep = False
+
+            for (x, y, _, _), (xp, yp, _, _) in zip(snapshot, snapshotp):
+                dx = x - xp
+                dy = y - yp
+                if dx*dx + dy*dy > d_min2:
+                    keep = True
+                    break
+
+            if keep:
+                newdata.append((t, snapshot, E_kin, Ep_grav, L_tot, m_max))
+
+        self.data = newdata
 
 

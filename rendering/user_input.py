@@ -8,6 +8,7 @@ import pygame
 
 import config
 
+
 def handle_input(event, state):
 
     oldLPIXELS_PER_UNIT = config.LPIXELS_PER_UNIT
@@ -57,9 +58,18 @@ def handle_input(event, state):
 ########################
 ####    Pantalla esquerra
 ####
-        if event.key == pygame.K_c:    # Tecla "c"   neteja els plots pantalla dreta
+        if event.key == pygame.K_c:    # Tecla "c"   neteja els plots pantalla dreta ((deixa els últims 10))
             state["r_screen_clear"] = True
 
+        if event.key == pygame.K_x:    # Tecla "x"   neteja els plots "estroboscòpics" (segons la distáncia entre els punts)
+            state["r_screen_prune"] = True
+        if event.key == pygame.K_z:    # Tecla "z"   neteja els plots pantalla dreta (elimina el 50% dels punts)
+            state["r_screen_Zprune"] = True
+        
+
+        if event.key == pygame.K_f:    # Tecla "f"   mostra els vectors velocitat i acceleració durant els flaixos estroboscòpics
+            state["kin_show"] = True
+            
 
         if event.key == pygame.K_t or event.key == pygame.K_b:    # Tecla "t" Zoom in      # Tecla "b" Zoom out
             factor = 10 if state["g_pressed"] else 1.1
@@ -72,7 +82,7 @@ def handle_input(event, state):
             cy = config.HEIGHT // 2
             config.LEFT_X = cx - (config.LPIXELS_PER_UNIT / oldLPIXELS_PER_UNIT) * ( cx - config.LEFT_X )
             config.LEFT_Y = cy - (config.LPIXELS_PER_UNIT / oldLPIXELS_PER_UNIT) * ( cy - config.LEFT_Y )
-            print(f"LPIXELS_PER_UNIT: {config.LPIXELS_PER_UNIT}")
+            print(f"LPIXELS_PER_UNIT: {config.LPIXELS_PER_UNIT}:.0f")
 
 
 ########################
@@ -90,7 +100,7 @@ def handle_input(event, state):
             cy = config.HEIGHT // 4
             config.RIGHT_X = cx - (config.RPIXELS_PER_UNIT / oldRPIXELS_PER_UNIT) * ( cx - config.RIGHT_X )
             config.RIGHT_Y = cy - (config.RPIXELS_PER_UNIT / oldRPIXELS_PER_UNIT) * ( cy - config.RIGHT_Y )
-            print(f"RPIXELS_PER_UNIT: {config.RPIXELS_PER_UNIT} {config.RIGHT_X} {config.RIGHT_Y}")
+            print(f"RPIXELS_PER_UNIT: {config.RPIXELS_PER_UNIT:.0f} {config.RIGHT_X} {config.RIGHT_Y}")
 
 ####        Velocitats:
         if event.key == pygame.K_u or event.key == pygame.K_m:    # Tecla "u" Zoom in       # Tecla "m" Zoom out
@@ -116,8 +126,10 @@ def handle_input(event, state):
     if event.type == pygame.KEYUP:
         if event.key == pygame.K_r:      # Les fletxes mouen la representació posició de la pantalla dreta
             state["r_pressed"] = False
-            
-            
+
+    if event.type == pygame.KEYUP:
+        if event.key == pygame.K_f:    # Tecla "f"   mostra els vectors velocitat i acceleració durant els flaixos estroboscòpics
+            state["kin_show"] = False            
 
     return True
 

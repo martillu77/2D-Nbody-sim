@@ -34,6 +34,8 @@ class World:
             if abs(p.ax) > 0. and abs(p.ay) > 0.:
                 self.autoacc = True
 
+        self.checkdt = True
+
 
 
     def grav_fusion(self, used, to_merge):
@@ -49,6 +51,7 @@ class World:
             #print("grav_fusion ", to_merge[0], " i ", i, " j ", j)
             # R_cm :
             m = self.particles[i].m + self.particles[j].m
+            cfr = self.particles[i].cfr / (self.particles[i].m)**(1/3)
             x = (self.particles[i].m*self.particles[i].x + self.particles[j].m * self.particles[j].x)/m
             y = (self.particles[i].m*self.particles[i].y + self.particles[j].m * self.particles[j].y)/m
             # V_cm :
@@ -61,8 +64,8 @@ class World:
             thisE_lost = 0.5 * mu * ( (self.particles[i].vx - self.particles[j].vx)**2 + (self.particles[i].vy - self.particles[j].vy)**2 )  # Kin_rel
             thisE_lost -= (config.GRAV_G * self.particles[i].m * self.particles[j].m) / dist                                                 # U_grav
             self.E_lost += thisE_lost
-            print(f"Merged particle with mass: {m}  i canvi d'energia: {self.E_lost:.3e}, en aquest cas {thisE_lost:.3e}")
-            p = Particle(x=x, y=y, vx=vx, vy=vy, m=m)
+            print(f"Merged particle with mass: {m:.3e}  i canvi d'energia: {self.E_lost:.3e}, en aquest cas {thisE_lost:.3e}")
+            p = Particle(x=x, y=y, vx=vx, vy=vy, m=m, cfr=cfr)
             surviving_particles.append(p)
 
         self.particles = []
@@ -105,7 +108,7 @@ class World:
                 #if (p1.cfr+p2.cfr) > dist:  
 
                     #print(nx, " ", ny, "    ", dvx, " ", dvy)
-                    print(f"col.lisio: dist {dist}  rad.F.contact. {p1.cfr} v_rel*dt {dt*math.sqrt( dvx**2 + dvy**2 )} v_rel {v_rel}")                    
+                    print(f"col.lisio: dist {dist:.3e}  rad.F.contact. {p1.cfr:.3e} v_rel*dt {dt*math.sqrt( dvx**2 + dvy**2 )} v_rel {v_rel}")                    
 
 
                     if v_rel < 0:   # S'apropen: força de contacte
@@ -114,7 +117,7 @@ class World:
                         pcr = min(p1.cr, p2.cr)   # Combinació dels coeficients de restitució  MILLORAR: afegir altres models
                         pj = -(1 + pcr) * v_rel
                         pj /= (1/p1.m + 1/p2.m)
-                        print("velocitats: ", p1.vx, p2.vx, v_rel)
+                        print(f"velocitats: {p1.vx:.3e} {p2.vx:.3e} {v_rel:.3e}")
                         p1.vx -= pj * nx / p1.m
                         p1.vy -= pj * ny / p1.m
 
@@ -124,8 +127,8 @@ class World:
                         dvx = p2.vx - p1.vx
                         dvy = p2.vy - p1.vy
                         v_rel = dvx*nx + dvy*ny
-                        print("velocitats: ", p1.vx, p2.vx, v_rel)
-                        print("Ara si: ", abs(r2), p1.vx, p2.vx, dvx, pj, pcr)
+                        print(f"noves velocitats: {p1.vx:.3e} {p2.vx:.3e} {v_rel:.3e}")
+                        print(f"Ara si {abs(r2):.3e} {dvx:.3e}, {pj:.3e} {pcr}")
                         #print(dx, dvx, v_rel, pcr)
                         #val = input("Enter your value: ")
                         
@@ -158,6 +161,7 @@ class World:
 
     def grav_acceleration(self, particles, dt):
         accs = [[0.0, 0.0] for _ in particles]
+        r_min = 999.
         for i in range(len(particles)):
             for j in range(i+1, len(particles)):
                 p1 = particles[i]
@@ -168,6 +172,8 @@ class World:
 
                 r2 = dx*dx + dy*dy
                 r = math.sqrt(r2)
+                if r_min > r:
+                    r_min = r
                 inv_r3 = 1 / (r2 * r)
 
                 fx = config.GRAV_G * dx * inv_r3
@@ -181,7 +187,7 @@ class World:
                 accs[j][1] -= p1.m * fy
 #                print("R2: ", r2, " a[i]: ", accs[i][0], " ", accs[i][1], " a[j]: ", accs[j][0], " ", accs[j][1],)
 #        print("")
-        return accs
+        return accs, r_min
                     
     def add_gravity(self, dt):
         def force(particles):      # Se'n fa us a update
@@ -190,8 +196,10 @@ class World:
 
 
 
+
+
 ############################
-    def update(self, dt):
+    def do_update(self, dt):
 
         # Col.lisions:
         if config.PART_COLL:
@@ -209,7 +217,7 @@ class World:
 
         # afegeix forces globals:
         for force in self.forces:           #   de: add_constant_acceleration O add_gravity
-            glob_accs = force(self.particles)
+            glob_accs, r = force(self.particles)
             for i in range(len(accs)):
                 accs[i][0] += glob_accs[i][0]
                 accs[i][1] += glob_accs[i][1]
@@ -230,19 +238,30 @@ class World:
                     
         elif config.INTEGRATOR == "verlet":
 #            print("Verlet")
+            v_max = 0.
+            r_min = 999.
             # 1. mig pas velocitat
             for p, (ax, ay) in zip(self.particles, accs):
                 p.vx += 0.5 * ax * dt
                 p.vy += 0.5 * ay * dt
+                if v_max < math.hypot(p.vx, p.vy):
+                    v_max = math.hypot(p.vx, p.vy)
                 
             # actualitza posicions:    O(N)
             for p, (ax, ay) in zip(self.particles, accs):
                 p.x += p.vx * dt #+ (0.5*ax*dt*dt)
                 p.y += p.vy * dt #+ (0.5*ay*dt*dt)
-                
+
+
             # noves acceleracions:     O(N^2)
-#            print("noves accs")
-            new_accs = self.grav_acceleration(self.particles, dt)
+            new_accs, r_min = self.grav_acceleration(self.particles, dt)
+
+            #a_max = max(math.hypot(anewx, anewy) for anewx, anewy in new_accs)
+            dt_test = 0.01 * (r_min / v_max if v_max > 0 else dt)
+            if dt_test < dt:
+                self.checkdt = True
+            else:
+                self.checkdt = False
             
             # actualitza velocitats:   O(N)
 #            print("noves vels")
@@ -297,5 +316,35 @@ class World:
         return True              # Continua la simulació
         
         
+############################
+    def update(self, dt):
+
+        ret = True
+        if self.checkdt:
+            v_max = max(math.hypot(p.vx, p.vy) for p in self.particles)
+            #a_max = max(math.hypot(ax, ay) for ax, ay in accs)
+            r_min = 999.
+            for i in range(len(self.particles)):
+                for j in range(i+1, len(self.particles)):
+                    p1 = self.particles[i]
+                    p2 = self.particles[j]
+                    if r_min > math.sqrt((p1.x-p2.x)**2 + (p1.y-p2.y)**2):
+                        r_min = math.sqrt((p1.x-p2.x)**2 + (p1.y-p2.y)**2)
+
+            
+            dt_test = (config.SIM_DT_PARAM/100.) * (r_min / v_max if v_max > 0 else dt)
+            #dt_test = (config.SIM_DT_PARAM/1000) * (r_min / v_max if v_max > 0 else dt)
+            print(f"\n v_max: {v_max:.3e} r_min: {r_min:.3e}      dt_test: {dt_test:.3e} {1/dt_test:.3e}")
+            if dt_test < dt:
+                N = math.ceil(dt / dt_test)
+                dt_test = dt / N
+
+                print(f"Time will be rescaled: {N} times")
+                for _ in range(N):
+                    ret = self.do_update(dt_test)
+            else:
+                ret = self.do_update(dt)
+        else:
+            ret = self.do_update(dt)
         
-        
+        return ret
