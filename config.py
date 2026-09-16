@@ -5,6 +5,8 @@
 # the Free Software Foundation, version 3.
 
 import math
+from pathlib import Path
+import pickle
 
 LPIXELS_PER_UNIT = 0
 WIDTH = None
@@ -41,13 +43,15 @@ PART_CFR = 0.1            # Contact interaction radius (in simulation units). Ca
 PART_CR = 1.              # Coefficient of restitution (0 = inelastic, 1 = elastic)
 PART_COLL = True          # Enable/disable collisions
 PART_FUS_VTHRE = 2.       # Relative velocity threshold for fusion (with gravity, relative energy condition is used instead)
+SEED = 42                 # When creating particles properly randomize (None) or set a seed in advance (number, if you want to debug or reproduce a configuration)
 
 # "World" configuration:
 INTEGRATOR = "verlet"     # Integrators (from worse to better): "euler", "cromer", "verlet" 
-SIM_DT_PARAM = 0.01       # Simulation timestep factor (smaller means smaller timestep)
-SIM_DT_MAX = 1.0e+5       # Simulation timestep MAXIMUM (to avoid too slow simulations).
-                          #    This may override SIM_DT_PARAM
+SIM_DT_PARAM = 0.01       # [t]   Simulation timestep factor (smaller means smaller timestep)
+SIM_DT_MAX = 1.0e+5       # [1/t] Simulation timestep MAXIMUM (to avoid too slow simulations).
+                          #         This may override SIM_DT_PARAM
 
+GRAVITY = True            # Is there a gravitional field or just a force field (defined in particles)
 GRAV_G = 1 # 4*100*math.pi**2    # Gravitational constant (G = 0 disables gravity)
 
 WALLS = False    # If True, particles bounce off boundaries
@@ -118,8 +122,26 @@ def init():
 #    print(f"Pixels per unitat als càlculs: {LPIXELS_PER_UNIT}, Radi part. a la pantalla: {PARTICLE_RAD} Radi forces de contacte (als càlculs): {PART_CFR:.3e}")
 
 
+def resume(load_dir):
+    with open(Path(load_dir) / "units.pkl", "rb") as f:  # guardat a units.py
+        data = pickle.load(f)
 
+    global LPIXELS_PER_UNIT, RPIXELS_PER_UNIT, RPIXELS_PER_UNIT_V
+    global GRAV_G, TYPICAL_DIST, TYPICAL_VEL, TYPICAL_M
+    global TYPICAL_T, SIM_DT_PARAM, SIM_DT_MAX
 
+    GRAV_G = data["GRAV_G"]
+    LPIXELS_PER_UNIT = data["LPIXELS_PER_UNIT"]
+    RPIXELS_PER_UNIT = data["RPIXELS_PER_UNIT"]
+    RPIXELS_PER_UNIT_V = data["RPIXELS_PER_UNIT_V"]
+    TYPICAL_DIST = data["TYPICAL_DIST"]
+    TYPICAL_VEL = data["TYPICAL_VEL"]
+    TYPICAL_M = data["TYPICAL_M"]
+    TYPICAL_T = data["TYPICAL_T"]
+    SIM_DT_PARAM = data["SIM_DT_PARAM"]
+    SIM_DT_MAX = data["SIM_DT_MAX"]
+
+    return data["dt_sim"]    
 
 
 

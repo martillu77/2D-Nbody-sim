@@ -5,8 +5,19 @@ This project is licensed under the GNU General Public License v3.0.
 Contact: lluis.marti_at_gmx.net
 
 #######################################
-##   VERSION			v.0.2.0      ##
+##   VERSION			v.1.0.0      ##
 #######################################
+
+
+Version v.1.0.0 summary:
+
+Added the possibility to save the simulation with the S key. The name of the directory where the simulation is saved is shown in the terminal, and the simulation can be resumed later.
+For more details see the README.md file.
+Other simulation parameters are also saved along with the simulation state.
+
+
+################################################################################
+Version v.0.2.0 summary:
 
 --------------------------
 * Scaling and Units:
@@ -28,7 +39,15 @@ Besides, local time processing was added. This is an automatic substepping in si
 - High accelerations
 
 Preservation of temporal coherence with the global step so as to keep the simulation's simplecticity (better energy and angular momentum conservation) 
+
+* Overall behaviour after v.0.2.0
+Significant improvement in:
+	- Orbital stability
+	- Close encounter handling
+	- Accuracy–performance balance
 	​
+
+################################################################################
 --------------------------
 ​* User control
 
@@ -49,9 +68,5 @@ To improve the understanding of the system being simulated and its didactic valu
 
 
 --------------------------
-* Overall behaviour after v.0.2.0
-Significant improvement in:
-	- Orbital stability
-	- Close encounter handling
-	- Accuracy–performance balance
+
 

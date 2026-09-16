@@ -9,6 +9,8 @@ SUMMARY: This is a 2D N-body simulator. It opens a window divided into two parts
 
 Goal: to interactively explore the dynamics of particle systems with or without gravity, various force fields, and collisions.
 
+Run: python main.py
+Saved simulation: python main.py "name of the directory where it was saved"  (see below in "OTHERS" and "Controls")
 ---------------------------------------------------------------------
 SIMULATION FEATURES:
 
@@ -29,12 +31,12 @@ The simulator includes three different integrators for the equations of motion (
     COLLISIONS
 Particles can collide if enabled (config.py variable PART_COLL = True). In this case particles have a finite interaction radius defined by PART_CFR. When a collision occurs, it is handled using a coefficient of restitution (PART_CR) between 0 and 1 (0 = inelastic, 1 = elastic).
 
-    OTHER
+    OTHERS
 The right window shows positions (top) and velocities (bottom) at fixed time intervals (DT_SAMPLE). It also displays kinetic energy, gravitational potential energy, total energy, and total angular momentum (with respect to the origin x, y = 0, 0) at the top.
 
 The simulation can be paused with the "space" key or exited with "ESC".
 
-Zoom in the left window can be controlled with keys "t" and "b", in the right window (positions) with "u" and "m", and for velocities with "i" and "l". Stroboscopic points can be partially cleared with the "c" key. The left window view can be adjusted more finely using the arrow keys. All zoom controls can be amplified using the "g" key.
+OTHER KEYS: there is a summary at below
 
 ---------------------------------------------------------------------
 PEDAGOGICAL INTEREST
@@ -48,6 +50,8 @@ Examples can be easily found in main.py, including a Solar System setup or a set
 In complex particle systems (e.g. N=200), different types of interactions can be observed: formation of binary systems, ejection of bodies through orbital energy transfer, etc.
 
 Since it supports collisions with different elasticity and a large number of particles, this simulation allows experimenting with many types of systems and helps develop intuition about the underlying physics.
+
+Press the S key to save the current configuration and other variables. In the terminal it will be shown the name of the directory where it has been saved (see SUMMARY to see how to run it)
 
 ---------------------------------------------------------------------
 LIMITATIONS (known and incomplete)
@@ -70,13 +74,46 @@ project/
 ├── simulation/
 │   ├── particle.py
 │   ├── world.py
-│   └── sampler.py
+│   ├── sampler.py
+│   └── units.py
 │
 ├── rendering/
 │   ├── draw.py
 │   ├── plots.py
 │   └── user_input.py
 └── config.py          <---- parameters controlling simulation and visualization (with detailed comments)
+
+
+---------------------------------------------------------------------
+Controls - KEYS
+
+### Simulation
+- `SPACE` — Pause / resume the simulation.
+- `ESC` — Exit the simulation.
+- `S` — Save the current simulation.
+
+### Left panel
+- `T` — Zoom in.
+- `B` — Zoom out.
+- arrows — Move the view.
+- `F` — Show velocity and acceleration vectors during the stroboscopic flashes.
+
+### Right panel — position
+- `Y` — Zoom in.
+- `N` — Zoom out.
+- Hold `R` + arrows — Move the position plot.
+
+### Right panel — velocity
+- `U` — Zoom in.
+- `M` — Zoom out.
+
+### Zoom
+- Hold `G` — Increase/decrease zoom by a factor of 10 instead of the normal factor.
+
+### Stroboscopic points
+- `C` — Clear the stroboscopic points, keeping the last 10.
+- `X` — Prune stroboscopic points according to their spatial separation.
+- `Z` — Remove 50% of the stroboscopic points.
 
 
 Contact: lluis.marti_at_gmx.net

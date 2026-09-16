@@ -5,8 +5,10 @@
 # the Free Software Foundation, version 3.
 
 import config
+import pickle
+from pathlib import Path
 
-def compute_scales(particles):
+def compute_scales(particles):  # called by natural_units below
     # posicions i masses en unitats de l’usuari
     import math
 
@@ -21,7 +23,7 @@ def compute_scales(particles):
     return L, V, M
     
     
-    
+# Recalculate particle values (pos, vel, size, mass) with more natural units:
 def natural_units(particles):
     config.TYPICAL_DIST, config.TYPICAL_VEL, config.TYPICAL_M = compute_scales(particles)
     config.TYPICAL_T = (config.TYPICAL_DIST**3 / (config.GRAV_G * config.TYPICAL_M))**0.5
@@ -67,7 +69,28 @@ def natural_units(particles):
 
     return particles
 
-def user_units(particles, L, T):
+
+def save_units(timestamp, dt_sim, filename="units.pkl"):    # recuperats a config.py
+    data = {
+        "GRAVITY": config.GRAVITY,
+        "GRAV_G": config.GRAV_G,
+        "LPIXELS_PER_UNIT": config.LPIXELS_PER_UNIT,
+        "RPIXELS_PER_UNIT": config.RPIXELS_PER_UNIT,
+        "RPIXELS_PER_UNIT_V": config.RPIXELS_PER_UNIT_V,
+        "TYPICAL_DIST": config.TYPICAL_DIST,
+        "TYPICAL_VEL": config.TYPICAL_VEL,
+        "TYPICAL_M": config.TYPICAL_M,
+        "TYPICAL_T": config.TYPICAL_T,
+        "SIM_DT_PARAM": config.SIM_DT_PARAM,
+        "SIM_DT_MAX": config.SIM_DT_MAX,
+        "dt_sim": dt_sim
+    }
+    directory = Path(timestamp)
+    directory.mkdir(exist_ok=True)
+    with open(directory / filename, "wb") as f:
+        pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+def user_units(particles, L, T):   # no la fa servir ningu
     return [
         Particle(
             x=p.x * L,

@@ -6,16 +6,20 @@
 
 import config
 
+import pickle
+from pathlib import Path
+
 class Sampler:
     def __init__(self, dt_sample=config.DT_SAMPLE):
         self.dt_sample = dt_sample
-        self.timer = 0
-        self.t = 0
+        self.timer = 0    # Per decidir quan hi ha un flaix stroboscopic [0, DT_SAMPLE]
+        self.time = 0
         self.data = []    # [(t, x, y, vx, vy, E_kin...), ...]
 
-    def trigger(self, dt, dt_real):
+    # Decideix si hi ha d'haver un flaix estroboscopic:
+    def trigger(self, dt_sim, dt_real):
         self.timer += dt_real
-        self.t += dt
+        self.time += dt_sim
         if self.timer >= self.dt_sample:
             self.timer = 0
             return True
@@ -45,7 +49,7 @@ class Sampler:
                 
                 Ep_grav -= config.GRAV_G * p1.m * p2.m / r           # Energia potencial gravitatoria
 
-        self.data.append((self.t, snapshot, E_kin, Ep_grav, L_tot, m_max))
+        self.data.append((self.time, snapshot, E_kin, Ep_grav, L_tot, m_max))
 
 
     def downsample(self):
@@ -77,3 +81,27 @@ class Sampler:
         self.data = newdata
 
 
+
+
+    def save(self, timestamp, filename="sampler.pkl"):
+        data = {
+            "data": self.data,
+            "time": self.time,
+            "timer": self.timer
+        }
+
+        directory = Path(timestamp)
+        directory.mkdir(exist_ok=True)
+        with open(directory / filename, "wb") as f:
+            pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+    def resume(self, load_dir, filename="sampler.pkl"):
+        with open(Path(load_dir) / filename, "rb") as f:
+            data = pickle.load(f)
+
+        self.data = data["data"]
+        self.time = data["time"]
+        self.timer = data["timer"]
+        
+        

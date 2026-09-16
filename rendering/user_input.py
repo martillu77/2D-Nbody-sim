@@ -16,22 +16,22 @@ def handle_input(event, state):
     oldRPIXELS_PER_UNIT_V = config.RPIXELS_PER_UNIT_V
     
     
-    if event.type == pygame.QUIT:         # Click a X de la finestra
+    if event.type == pygame.QUIT:                        # Click a X de la finestra
         return False  # aturar simulació
    
     if event.type == pygame.KEYDOWN:
-        if event.key == pygame.K_SPACE:   # Espai per fer pausa
+        if event.key == pygame.K_SPACE:                  # Espai per fer pausa
             state["paused"] = not state["paused"]
-        elif event.key == pygame.K_ESCAPE:  # ESC per sortir
+        elif event.key == pygame.K_ESCAPE:               # ESC per sortir
             return False  # aturar simulació
 
-        if event.key == pygame.K_g:
+        if event.key == pygame.K_g:                     # g Magnifica el poder dels zooms
             state["g_pressed"] = True
             
-        if event.key == pygame.K_r:
+        if event.key == pygame.K_r:                     # r Les fletxes mouen la representació posició de la pantalla dreta
             state["r_pressed"] = True
 
-
+        # Arrows:
         if event.key == pygame.K_LEFT:
             if not state["r_pressed"]:
                 config.LEFT_X -= 10
@@ -80,6 +80,7 @@ def handle_input(event, state):
 
             cx = config.LEFT_WIDTH // 2
             cy = config.HEIGHT // 2
+            print(f"{config.LPIXELS_PER_UNIT} {oldLPIXELS_PER_UNIT}")
             config.LEFT_X = cx - (config.LPIXELS_PER_UNIT / oldLPIXELS_PER_UNIT) * ( cx - config.LEFT_X )
             config.LEFT_Y = cy - (config.LPIXELS_PER_UNIT / oldLPIXELS_PER_UNIT) * ( cy - config.LEFT_Y )
             print(f"LPIXELS_PER_UNIT: {config.LPIXELS_PER_UNIT}:.0f")
@@ -128,11 +129,14 @@ def handle_input(event, state):
             state["r_pressed"] = False
 
     if event.type == pygame.KEYUP:
-        if event.key == pygame.K_f:    # Tecla "f"   mostra els vectors velocitat i acceleració durant els flaixos estroboscòpics
-            state["kin_show"] = False            
+        if event.key == pygame.K_f:      # Tecla "f"   mostra els vectors velocitat i acceleració durant els flaixos estroboscòpics
+            state["kin_show"] = False
+
+    if event.type == pygame.KEYUP:
+        if event.key == pygame.K_s:      # Tecla "s"   guarda les dades de la simulacio
+            state["save_world"] = True
 
     return True
-
 
 
 

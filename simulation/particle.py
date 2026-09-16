@@ -9,6 +9,9 @@ import config
 import math
 import random
 
+from pathlib import Path
+import pickle
+
 # --- Física ---
 class Particle:
     def __init__(self, x=0, y=0, vx=0, vy=0, ax=0, ay=0, m=0.0, cfr=config.PART_CFR):
@@ -32,6 +35,12 @@ class Particle:
 
         v_max = 0.
         particles.append(cls(cx, cy, 0.0, 0.0, m=10, cfr=0.5e-1))   # llavor al centre
+        random.seed(config.SEED)
+        if config.SEED > 0:
+            print(f"\n\nWARNING !!!  Randomize: seed: {config.SEED}\n\n")
+        else:
+            print(f"Randomize: seed: {config.SEED}")
+
         for _ in range(N):
             # --- posició (disc uniforme en àrea) ---
             r = R * math.sqrt(random.random())
@@ -56,4 +65,26 @@ class Particle:
         return particles
         
 
-        
+    def resume(load_dir):
+        with open(Path(load_dir) / "world.pkl", "rb") as f:  # es guarda a world.py
+            data = pickle.load(f)
+
+        time = data["time"]                  # total simulation time
+        particles = []
+        for p_data in data["particles"]:
+            p = Particle(
+                x=p_data["x"],
+                y=p_data["y"],
+                vx=p_data["vx"],
+                vy=p_data["vy"],
+                ax=p_data["ax"],
+                ay=p_data["ay"],
+                m=p_data["m"],
+            )
+
+            p.cr = p_data["cr"]
+            p.cfr = p_data["cfr"]
+
+            particles.append(p)
+
+        return time, particles

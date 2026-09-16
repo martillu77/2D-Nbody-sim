@@ -9,6 +9,9 @@ RESUM: Aquest és un simulador 2D de N-partícules. Obre una finestra que es div
 
 Objectiu: explorar de manera interactiva la dinàmica de sistemes de partícules amb o sense gravetat, diversos camps de força i col·lisions.
 
+Execució: python main.py
+Si es vol continuar una simulacio guardada: python main.py "nom del directory on s'ha guardat"   (més indicacions a "ALTRES" i a "Controls")
+
 ---------------------------------------------------------------------
 POSSIBILITATS DE SIMULACIÓ:
 
@@ -34,7 +37,7 @@ La finestra de la dreta mostra posicions a dalt i velocitats a baix en intervals
 
 La simulació es pot pausar amb la tecla "espai" o sortir d'ella amb "ESC".
 
-A la finestra de la esquerra es pot fer zoom amb les tecles "t" i "b", a la finestra dreta de posicions amb les tecles "u" i "m" i a la de velocitats amb la "i" i "l". Els punts estroboscòpics poden esborrar-se parcialment amb la tecla "c". La imatge a la finestra de l'esquerra pot ajustar-se més finament amb les fletxes. Totes les tecles de zoom poden potenciar-se amb la tecla "g".
+ALTRES TECLES: hi ha un resum de les tecles i el que fan cap al final d'aquest document.
 
 ---------------------------------------------------------------------
 INTERÈS PEDAGÒGIC
@@ -48,6 +51,8 @@ Al codi main.py es poden trobar fàcilment exemples pel sistema solar o fins i t
 Els sistemes de partícules complexos (exemple N=200) es poden veure diferents tipus de interaccions: creació de sistemes binaris, ejecció d'un cos mitjançant transferència d'energia orbital d'altres cossos, etc.
 
 Donat que permet col·lisions de diferent grau d'elasticitat i un número alt de partícules aquesta simulació permet experimentar amb molts tipus de sistemes amb el que permet guanyar una intuïció de la física simulada.
+
+Amb la tecla S es pot guardar la configuració actual de partícules i altres variables. Al terminal s'indica el directori on es guarda (a RESUM podeu veure com executar-ho)
 
 ---------------------------------------------------------------------
 LIMITACIONS (conegudes i en qualsevol cas incompleta)
@@ -70,13 +75,46 @@ project/
 ├── simulation/
 │   ├── particle.py
 │   ├── world.py
-│   └── sampler.py
+│   ├── sampler.py
+│   └── units.py
 │
 ├── rendering/
 │   ├── draw.py
 │   ├── plots.py
 │   └── user_input.py
 └── config.py          <---- paràmetres que controlen la simulació i la visualització. Inclou molts comentaris sobre com fer-ho anar.
+
+
+---------------------------------------------------------------------
+## Controls - Tecles
+
+### Simulació
+- `ESPAI` — Pausa / reprèn la simulació.
+- `ESC` — Surt de la simulació.
+- `S` — Desa la simulació actual.
+
+### Panell esquerre
+- `T` — Apropa la vista.
+- `B` — Allunya la vista.
+- fletxes — Mou la vista.
+- `F` — Mostra els vectors de velocitat i acceleració durant els flaixos estroboscòpics.
+
+### Panell dret — posició
+- `Y` — Apropa la vista.
+- `N` — Allunya la vista.
+- Mantén premut `R` + fletxes — Mou la gràfica de posicions.
+
+### Panell dret — velocitat
+- `U` — Apropa la vista.
+- `M` — Allunya la vista.
+
+### Zoom
+- Mantén premut `G` — Augmenta o redueix el zoom per un factor 10 en lloc del factor normal.
+
+### Punts estroboscòpics
+- `C` — Esborra els punts estroboscòpics, conservant-ne els 10 últims.
+- `X` — Redueix els punts estroboscòpics segons la seva separació espacial.
+- `Z` — Elimina el 50 % dels punts estroboscòpics.
 
 
 Contacte: lluis.marti_at_gmx.net

@@ -6,6 +6,9 @@
 
 import math
 
+import pickle                 ## save world
+from pathlib import Path      ## save world
+
 import config
 from simulation.particle import Particle
 
@@ -151,14 +154,6 @@ class World:
 
 
 
-    def add_constant_acceleration(self, ax, ay):  # Se'n fa us a main.py: world.add_constant_acceleration(1.0, 0.0)
-        def force(particles):      # Se'n fa us a update
-            return [(ax, ay) for _ in particles]
-        self.forces.append(force)
-
-
-
-
     def grav_acceleration(self, particles, dt):
         accs = [[0.0, 0.0] for _ in particles]
         r_min = 999.
@@ -194,11 +189,13 @@ class World:
             return self.grav_acceleration(particles, dt)
         self.forces.append(force)
 
+    def add_constant_acceleration(self, ax, ay):  # Se'n fa us a main.py: world.add_constant_acceleration(1.0, 0.0)
+        def force(particles):      # Se'n fa us a update
+            return [(ax, ay) for _ in particles]
+        self.forces.append(force)
 
 
 
-
-############################
     def do_update(self, dt):
 
         # Col.lisions:
@@ -348,3 +345,31 @@ class World:
             ret = self.do_update(dt)
         
         return ret
+
+
+#    def save(self, time, dt_sim, timestamp, filename="world.pkl"):  # es recupera a particle.py
+    def save(self, time, timestamp, filename="world.pkl"):  # es recupera a particle.py
+        print(f"time {time}")
+        data = {
+            "time": time,            # total simulation time
+            # "dt_sim": dt_sim,       # simulation time step   # es guarda/recupera a units.py/config.py
+            "particles": [
+                {
+                    "x": p.x,
+                    "y": p.y,
+                    "vx": p.vx,
+                    "vy": p.vy,
+                    "ax": p.ax,
+                    "ay": p.ay,
+                    "m": p.m,
+                    "cr": p.cr,
+                    "cfr": p.cfr
+                }
+                for p in self.particles
+            ],
+        }
+
+        directory = Path(timestamp)
+        directory.mkdir(exist_ok=True)
+        with open(directory / filename, "wb") as f:
+            pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)

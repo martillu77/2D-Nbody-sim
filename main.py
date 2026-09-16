@@ -4,6 +4,8 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, version 3.
 
+from pickle import TRUE
+
 import pygame
 import sys
 import math
@@ -12,35 +14,67 @@ import config
 
 from simulation.particle import Particle
 from simulation.world import World
-from simulation.units import natural_units
+from simulation.units import natural_units, save_units
 from simulation.sampler import Sampler
 from rendering.draw import draw_particles
 from rendering.plots import draw_plots
 from rendering.user_input import handle_input
 
+from datetime import datetime
+
+
+import sys
+if len(sys.argv) > 1:
+    load_dir = sys.argv[1]
+    resume_simulation = True
+else:
+    load_dir = None
+    resume_simulation = False
+
+
 # --- Inicialització ---
 pygame.init()
-config.init()
+if resume_simulation:
+    pygame.display.set_caption(f"2D simulation with stroboscopic view (resumed simulation {load_dir})")
+    print(f"2D simulation with stroboscopic view (resumed simulation {load_dir})")
+else:
+    pygame.display.set_caption("2D simulation with stroboscopic view")
 
-pygame.display.set_caption("2D simulation with stroboscopic view")
 #pygame.display.set_caption("Simulació de partícules amb anotacions estroboscòpiques")
 font = pygame.font.SysFont(None, 28)
+
+# Load configuration
+config.init()
+if resume_simulation:
+    dt_sim = config.resume(load_dir)   # simulation time step
+    DT = dt_sim
+
 
 screen = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
 clock = pygame.time.Clock()
 
+
 sampler = Sampler(config.DT_SAMPLE)
+if resume_simulation:
+    sampler.resume(load_dir)
+
+
 
 dt_real = clock.tick(config.FPS) / 1000  # Per FPS = 60 --> dt_real = 0.016
-
+print(f"dt_real from clock: {dt_real}")
 
 # Posició al centre de la pantalla esquerra de simulació:
 mid_x = 0. #config.LEFT_WIDTH/(2*config.LPIXELS_PER_UNIT)
 mid_y = 0. #config.HEIGHT/(2*config.LPIXELS_PER_UNIT)
 
 
-# Genera un disc de N particules dins d'un radi donat i petita rotació global (òmega):
-particles = Particle.generate_disk(N=200, center=(mid_x, mid_y), R=50, omega=0.002)
+if resume_simulation:
+    time, particles = Particle.resume(load_dir)
+else:
+    # Genera un disc de N particules dins d'un radi donat i petita rotació global (òmega):
+    time = 0   # inicia el temps global de la simulacio. El que surt a la pantalla dreta es multiplica per config.TYPICAL_T
+    particles = Particle.generate_disk(N=3, center=(mid_x, mid_y), R=50, omega=0.02)
+
 
 
 
@@ -103,46 +137,59 @@ particles = Particle.generate_disk(N=200, center=(mid_x, mid_y), R=50, omega=0.0
 #    Particle(x=mid_x+300.5, y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/300.5),   m=5.1e-5)     # Neptú
 #]
 
-particles = natural_units(particles)
+if not resume_simulation:
+    # Recalculate particle values (pos, vel, size, mass) with more natural units:
+    particles = natural_units(particles)
+
 
 # Defineix el "món":
 world = World(particles)
 
-# Camp global:
-#world.add_constant_acceleration(0.0, 9.8)   # Descomenta per produir un camp de força global d'acceleració constant per tota partícula
+if not resume_simulation:
 
+    ##################
+    # Estimació de pas de temps per la simulació (dt_sim) òptim. El paràmetre SIM_DT_PARAM (veure config.py) ajuda l'usuari a regular-lo.
+    accs, r = world.grav_acceleration(world.particles, dt=1)
+    v_max = max(math.hypot(p.vx, p.vy) for p in world.particles)
+    a_max = max(math.hypot(ax, ay) for ax, ay in accs)
+    r_min = min(p.cfr for p in world.particles)
 
-##################
-# Estimació de pas de temps per la simulació (dt_sim) òptim. El paràmetre SIM_DT_PARAM (veure config.py) ajuda l'usuari a regular-lo.
-accs, r = world.grav_acceleration(world.particles, dt=1)
-v_max = max(math.hypot(p.vx, p.vy) for p in world.particles)
-a_max = max(math.hypot(ax, ay) for ax, ay in accs)
-r_min = min(p.cfr for p in world.particles)
-
-dt_sim = config.SIM_DT_PARAM * min(
-    r_min / v_max if v_max > 0 else float('inf'),
-    math.sqrt(r_min / a_max) if a_max > 0 else float('inf')#,
-#    math.sqrt(r_min**3/config.TYPICAL_M)
-    )
-if dt_sim < 1/config.SIM_DT_MAX:
-    print(f"ATTENTION: dt_sim too small ({dt_sim:.3e}) changed to SIM_DT_MAX {1/config.SIM_DT_MAX}. Value overriden. Please, check.")
-    dt_sim = 1/config.SIM_DT_MAX
+    dt_sim = config.SIM_DT_PARAM * min(
+        r_min / v_max if v_max > 0 else float('inf'),
+        math.sqrt(r_min / a_max) if a_max > 0 else float('inf')#,
+    #    math.sqrt(r_min**3/config.TYPICAL_M)
+        )
+    if dt_sim < 1/config.SIM_DT_MAX:
+        print(f"ATTENTION: dt_sim too small ({dt_sim:.3e}) changed to SIM_DT_MAX {1/config.SIM_DT_MAX}. Value overriden. Please, check.")
+        dt_sim = 1/config.SIM_DT_MAX
 
     
-print(f"v_max: {v_max:.3e}    r_min: {r_min:.3e}")
-DT = dt_sim                         # Guarda aquest temps per quan fas pausa                 
-print(f"Simulation time step {dt_sim:.3e} (1/{int(1/dt_sim):.3e})")
-#print(f"Pas de temps de simulació {dt_sim:.3e} (1/{int(1/dt_sim)})")
-##################
+    print(f"v_max: {v_max:.3e}    r_min: {r_min:.3e}")
+    DT = dt_sim                         # Guarda dt_sim (simulation time step) per quan fas pausa
+    print(f"Simulation time step {dt_sim:.3e} (1/{int(1/dt_sim):.3e})")
+    #print(f"Pas de temps de simulació {dt_sim:.3e} (1/{int(1/dt_sim)})")
+    ##################
 
 
-world.add_gravity(dt_sim)
-flash_timer = 0
+
+
+
+
+
+if config.GRAVITY:
+    # Gravetat:
+    world.add_gravity(dt_sim)
+else:
+    # Camp global                   x:   y:
+    world.add_constant_acceleration(0.0, 9.8)   # Descomenta per produir un camp de força global d'acceleració constant per tota partícula
+
+
+
 
 # --- Loop principal ---
-t = 0
 running = True
-
+flash_timer = 0
+# Set basic states to False before starting:
 state = {
     "paused": False,             # Pausa a la simulació
     "g_pressed": False,          # Magnifica el poder dels zooms
@@ -150,24 +197,33 @@ state = {
     "r_screen_clear": False,     # Neteja els punts stroboscòpics de la pantalla dreta (deixa els últims 10)
     "r_screen_prune": False,     # Neteja els punts stroboscòpics de la pantalla dreta (segons la distáncia entre els punts)
     "r_screen_Zprune": False,    # Neteja els punts stroboscòpics de la pantalla dreta (elimina el 50%)
-    "kin_show": False            # Ensenya els vectors de velocitat i acceleració durant el flaix estroboscòpic
+    "kin_show": False,           # Ensenya els vectors de velocitat i acceleració durant el flaix estroboscòpic
+    "save_world": False          # Guarda les dades de la simulacio
 }
 
+
+######################################
+# Main LOOP:
 while running:
 
-    t += dt_sim
-    #print("NOU pas de temps ", t)
+    time += dt_sim
     
-    # Events d'usuari
+    # Events d'usuari. Tecles, estats:
     for event in pygame.event.get():
         running = handle_input(event, state)
 
         if state["paused"]:
+            if resume_simulation:
+                pygame.display.set_caption(f"2D simulation with stroboscopic view (resumed simulation {load_dir}) |  Pause")
+            else:
 #            pygame.display.set_caption(f"Simulació 2D de partícules amb anotacions estroboscòpiques |  Pausa")
-            pygame.display.set_caption(f"2D simulation with stroboscopic view |  Pause")
+                pygame.display.set_caption(f"2D simulation with stroboscopic view |  Pause")
             dt_sim = 0
         else:
-            pygame.display.set_caption(f"2D simulation with stroboscopic view")
+            if resume_simulation:
+                pygame.display.set_caption(f"2D simulation with stroboscopic view (resumed simulation {load_dir})")
+            else:
+                pygame.display.set_caption(f"2D simulation with stroboscopic view")
             dt_sim = DT
         if state["r_screen_clear"]:
 #            sampler.data.clear()               # Esborra tots els punts "estroboscòpics"
@@ -179,12 +235,23 @@ while running:
         if state["r_screen_Zprune"]:
             sampler.data = sampler.data[::2]    # Elimina el 50% dels punts "estroboscòpics"
             state["r_screen_Zprune"] = False
+        if state["save_world"]:
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H%M")
+            print(f"\n\n  ---  Current simulation is being saved to {timestamp}\n\n")
+            #world.save(time, dt_sim, timestamp)
+            world.save(time, timestamp)
+            sampler.save(timestamp)
+            save_units(timestamp, DT)   # units.py    use DT instead of dt_sim in case user saves simulation during pause
+            state["save_world"] = False
+
+
 
     if not running:
         print("Sortida")
         continue
 
     # --- Update física ---
+    # Calcula el següent pas:
     if not state["paused"]:
         running = world.update(dt_sim)
         if not running:
@@ -196,8 +263,9 @@ while running:
         continue
             
     # --- Sampling ---
+    # Decideix si hi ha d'haver un flaix estroboscopic:
     if sampler.trigger(dt_sim, dt_real):
-        sampler.update(world.particles)
+        sampler.update(world.particles)       # Guarda les dades de l'estat actual (per despres ser mostrades a la pantalla de la dreta)
 #        if not state["kin_show"]:
 #            state["kin_show"] = False
         flash_timer = config.DT_FLASH         # Duració flaix. Si dt_real = 0.016 i flash_timer?0.1 => el flaix dura uns 6 frames
