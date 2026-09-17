@@ -52,7 +52,7 @@ SIM_DT_MAX = 1.0e+5       # [1/t] Simulation timestep MAXIMUM (to avoid too slow
                           #         This may override SIM_DT_PARAM
 
 GRAVITY = True            # Is there a gravitional field or just a force field (defined in particles)
-GRAV_G = 1 # 4*100*math.pi**2    # Gravitational constant (G = 0 disables gravity)
+GRAV_G = 1                # 4*100*math.pi**2    # Gravitational constant (G = 0 disables gravity)
 
 WALLS = False    # If True, particles bounce off boundaries
 BOUNDS = None    # = None or True

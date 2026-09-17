@@ -12,6 +12,9 @@ from pathlib import Path      ## save world
 import config
 from simulation.particle import Particle
 
+import sys
+from tqdm import tqdm
+
 class World:
 
     def __init__(self, particles):
@@ -37,8 +40,12 @@ class World:
             if abs(p.ax) > 0. and abs(p.ay) > 0.:
                 self.autoacc = True
 
-        self.checkdt = True
+        self.checkdt = True   # Flag set in world.do_update to detect whether dt_sim may need to be re-scaled
+        self.dt_test = 0      # Calculation of the time step that is actually needed to keep a good accuracy.
+                              #   If considerably smaller than dt_sim re-scale dt_sim such that simplecticity is kept
+                              #   in world.update
 
+        self.terminal = sys.stderr.isatty()  # Is the simulation running on a terminal (True/False) ?
 
 
     def grav_fusion(self, used, to_merge):
@@ -205,7 +212,7 @@ class World:
 
         accs = [[0.0, 0.0] for _ in self.particles]
 
-        # comença amb acceleració pròpia:
+        # si n'hi ha comença amb acceleració pròpia:
         if self.autoacc:
             #print("Auto acceleració")
             for i, p in enumerate(self.particles):
@@ -219,7 +226,7 @@ class World:
                 accs[i][0] += glob_accs[i][0]
                 accs[i][1] += glob_accs[i][1]
 
-        # integra:
+        # Integra:
         if config.INTEGRATOR == "euler" or config.INTEGRATOR == "cromer":
             for p, (ax, ay) in zip(self.particles, accs):
                 if config.INTEGRATOR == "euler":
@@ -236,13 +243,12 @@ class World:
         elif config.INTEGRATOR == "verlet":
 #            print("Verlet")
             v_max = 0.
-            r_min = 999.
+            r_min = float('inf')
             # 1. mig pas velocitat
             for p, (ax, ay) in zip(self.particles, accs):
                 p.vx += 0.5 * ax * dt
                 p.vy += 0.5 * ay * dt
-                if v_max < math.hypot(p.vx, p.vy):
-                    v_max = math.hypot(p.vx, p.vy)
+
                 
             # actualitza posicions:    O(N)
             for p, (ax, ay) in zip(self.particles, accs):
@@ -253,20 +259,21 @@ class World:
             # noves acceleracions:     O(N^2)
             new_accs, r_min = self.grav_acceleration(self.particles, dt)
 
-            #a_max = max(math.hypot(anewx, anewy) for anewx, anewy in new_accs)
-            dt_test = 0.01 * (r_min / v_max if v_max > 0 else dt)
-            if dt_test < dt:
-                self.checkdt = True
-            else:
-                self.checkdt = False
-            
             # actualitza velocitats:   O(N)
 #            print("noves vels")
             for p, (ax, ay), (ax_new, ay_new) in zip(self.particles, accs, new_accs):
                 p.vx += 0.5*ax_new*dt  #(ax + ax_new)*dt
                 p.vy += 0.5*ay_new*dt  #(ay + ay_new)*dt
-#                print("vx: ", p.vx, " vy: ", p.vy)
-#            print("")
+                if v_max < math.hypot(p.vx, p.vy):
+                    v_max = math.hypot(p.vx, p.vy)
+
+            #a_max = max(math.hypot(anewx, anewy) for anewx, anewy in new_accs)
+            self.dt_test = (config.SIM_DT_PARAM/100.) * (r_min / v_max if v_max > 0 else dt)
+            if self.dt_test < dt:
+                self.checkdt = True
+            else:
+                self.checkdt = False
+
         else:
             print("Integrador desconegut")
 
@@ -314,38 +321,57 @@ class World:
         
         
 ############################
-    def update(self, dt):
+    def update(self, dt_sim):
 
         ret = True
-        if self.checkdt:
-            v_max = max(math.hypot(p.vx, p.vy) for p in self.particles)
-            #a_max = max(math.hypot(ax, ay) for ax, ay in accs)
-            r_min = 999.
-            for i in range(len(self.particles)):
-                for j in range(i+1, len(self.particles)):
-                    p1 = self.particles[i]
-                    p2 = self.particles[j]
-                    if r_min > math.sqrt((p1.x-p2.x)**2 + (p1.y-p2.y)**2):
-                        r_min = math.sqrt((p1.x-p2.x)**2 + (p1.y-p2.y)**2)
+        if self.checkdt:   # Verlet: It was detected in world.do_update that dt_sim may need to be re-scaled
+                           # Euler/Cromer: always
+            if config.INTEGRATOR == "euler" or config.INTEGRATOR == "cromer":
+                v_max = max(math.hypot(p.vx, p.vy) for p in self.particles)
+                #a_max = max(math.hypot(ax, ay) for ax, ay in accs)
+                r_min = float('inf')
+                for i in range(len(self.particles)):
+                    for j in range(i+1, len(self.particles)):
+                        p1 = self.particles[i]
+                        p2 = self.particles[j]
+                        if r_min > math.sqrt((p1.x-p2.x)**2 + (p1.y-p2.y)**2):
+                            r_min = math.sqrt((p1.x-p2.x)**2 + (p1.y-p2.y)**2)
 
             
-            dt_test = (config.SIM_DT_PARAM/100.) * (r_min / v_max if v_max > 0 else dt)
-            #dt_test = (config.SIM_DT_PARAM/1000) * (r_min / v_max if v_max > 0 else dt)
-            print(f"\n v_max: {v_max:.3e} r_min: {r_min:.3e}      dt_test: {dt_test:.3e} {1/dt_test:.3e}")
-            if dt_test < dt:
-                N = math.ceil(dt / dt_test)
-                dt_test = dt / N
+                self.dt_test = (config.SIM_DT_PARAM/100.) * (r_min / v_max if v_max > 0 else dt_sim)
+                #dt_test = (config.SIM_DT_PARAM/1000) * (r_min / v_max if v_max > 0 else dt_sim)
+                print(f"\n v_max: {v_max:.3e} r_min: {r_min:.3e}      dt_test: {dt_test:.3e} {1/dt_test:.3e}")
 
-                print(f"Time will be rescaled: {N} times")
-                for _ in range(N):
-                    ret = self.do_update(dt_test)
+            #elif config.INTEGRATOR == "verlet":   # Nothing needed. In this case it was already set in world.update
+            
+            if self.dt_test < dt_sim:
+                N = math.ceil(dt_sim / self.dt_test)
+                dt_scaled = dt_sim / N   # There will be N sub-steps in time
+
+#                print(f"Time will be rescaled: {N} times")
+#                for _ in range(N):
+#                    ret = self.do_update(dt_test)
+
+                if self.terminal:
+                    iterator = tqdm(range(N), desc="Time is being rescaled: ")
+                else:
+                    iterator = range(N)
+
+                for i in iterator:
+                    ret = self.do_update(dt_scaled)
+                    if not self.terminal and (i + 1) % max(1, N // 10) == 0:
+                        print(f"Time is being rescaled... {i+1}/{N}", flush=True)
+
+                if not self.terminal: print("Done!")
+
+
+
             else:
-                ret = self.do_update(dt)
-        else:
-            ret = self.do_update(dt)
-        
-        return ret
+                ret = self.do_update(dt_sim)
+        else:    # This can be only in case of Verlet integrator
+            ret = self.do_update(dt_sim)
 
+        return ret
 
 #    def save(self, time, dt_sim, timestamp, filename="world.pkl"):  # es recupera a particle.py
     def save(self, time, timestamp, filename="world.pkl"):  # es recupera a particle.py
@@ -373,3 +399,6 @@ class World:
         directory.mkdir(exist_ok=True)
         with open(directory / filename, "wb") as f:
             pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def set_dt_sim(self, dt_sim):
+        self.dt_test = dt_sim

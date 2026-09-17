@@ -170,7 +170,7 @@ if not resume_simulation:
     #print(f"Pas de temps de simulació {dt_sim:.3e} (1/{int(1/dt_sim)})")
     ##################
 
-
+world.set_dt_sim(dt_sim)    # set dt_sim in world
 
 
 
@@ -206,7 +206,7 @@ state = {
 # Main LOOP:
 while running:
 
-    time += dt_sim
+    time += dt_sim     # Simulation's time. On screen multiplied by 
     
     # Events d'usuari. Tecles, estats:
     for event in pygame.event.get():
@@ -244,11 +244,11 @@ while running:
             save_units(timestamp, DT)   # units.py    use DT instead of dt_sim in case user saves simulation during pause
             state["save_world"] = False
 
-
-
     if not running:
         print("Sortida")
         continue
+
+
 
     # --- Update física ---
     # Calcula el següent pas:

@@ -16,26 +16,25 @@ def draw_plots(surface, SamplerDatasets, font):
     pygame.draw.line(surface, (200,200,200), (0, mid_y), (config.RIGHT_WIDTH, mid_y), 1)
 
     colors_pos = [(255,100,100), (100,255,100), (255,255,100)]
-    colors_vel = [(100,200,255), (200,100,255), (100,255,255)]
+    #colors_vel = [(100,200,255), (200,100,255), (100,255,255)]
 
     ###########################################
     # Mostra alguns valors importants per pantalla:
     if SamplerDatasets:
-        t, snapshot, E_kin, Ep_grav, L_tot, m_max = SamplerDatasets[-1]
+        time, snapshot, E_kin, Ep_grav, L_tot, m_max = SamplerDatasets[-1]
 
         E_tot = E_kin + Ep_grav
         text = font.render(f"E_kin = {E_kin:.3e}  Ep = {Ep_grav:.3e}  E_tot = {E_tot:.3e}  L_tot = {L_tot:.3e}", True, (255,255,255))
         surface.blit(text, (10, 5))
-        time = config.TYPICAL_T*t
-        text_t = font.render(f"t = {config.TYPICAL_T*t:.2f}  Mmax = {m_max:.3e} N = {len(snapshot)}", True, (200,200,200))
-        surface.blit(text_t, (10, 30))
+        text = font.render(f"t = {config.TYPICAL_T*time:.2f}  Mmax = {m_max:.3e} N = {len(snapshot)}", True, (200,200,200))
+        surface.blit(text, (10, 30))
 
 
-    text_t = font.render(f"Posició", True, (200,200,200))
-    surface.blit(text_t, (10, mid_y-20))
+    text = font.render(f"Posició", True, (200,200,200))
+    surface.blit(text, (10, mid_y-20))
 
-    text_t = font.render(f"Velocitats", True, (200,200,200))
-    surface.blit(text_t, (10, config.HEIGHT-20))
+    text = font.render(f"Velocitats", True, (200,200,200))
+    surface.blit(text, (10, config.HEIGHT-20))
 
     #print( " ", config.RIGHT_X, " ", config.RPIXELS_PER_UNIT)
     #print( " RIGHT_VX: ", config.RIGHT_VX, " RPIXELS_PER_UNIT_V: ", config.RPIXELS_PER_UNIT_V)
