@@ -57,6 +57,7 @@ def draw_plots(surface, SamplerDatasets, font):
     # Draw snapshop:
     for data in SamplerDatasets:
         t, snapshot, E_kin, Ep_grav, L_tot, m_max = data
+        #print(f"\n Snapshot nou a temps: {t} {len(snapshot)}")
         for particle_idx, (x, y, vx, vy) in enumerate(snapshot):
             color_p = colors_pos[particle_idx % len(colors_pos)]
 #            color_v = colors_vel[particle_idx % len(colors_vel)]

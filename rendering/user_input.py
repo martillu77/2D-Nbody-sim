@@ -17,7 +17,7 @@ def handle_input(event, state):
     
     
     if event.type == pygame.QUIT:                        # Click a X de la finestra
-        return False  # aturar simulació
+        return False      # aturar simulació
    
     if event.type == pygame.KEYDOWN:
         if event.key == pygame.K_SPACE:                  # Espai per fer pausa
@@ -53,24 +53,16 @@ def handle_input(event, state):
             else:
                 config.RIGHT_Y += 10
 
-            
+########################
+####    Pantalles         
+
+        if event.key == pygame.K_a:    # Tecla "a"   mostra/salta mostrar les pantalles dreta i esquerra
+            config.SHOW = not config.SHOW
+            print(f"\n\nINFO: Screen show: {config.SHOW}\n\n")
 
 ########################
-####    Pantalla esquerra
+####    Pantalla esquerra: 
 ####
-        if event.key == pygame.K_c:    # Tecla "c"   neteja els plots pantalla dreta ((deixa els últims 10))
-            state["r_screen_clear"] = True
-
-        if event.key == pygame.K_x:    # Tecla "x"   neteja els plots "estroboscòpics" (segons la distáncia entre els punts)
-            state["r_screen_prune"] = True
-        if event.key == pygame.K_z:    # Tecla "z"   neteja els plots pantalla dreta (elimina el 50% dels punts)
-            state["r_screen_Zprune"] = True
-        
-
-        if event.key == pygame.K_f:    # Tecla "f"   mostra els vectors velocitat i acceleració durant els flaixos estroboscòpics
-            state["kin_show"] = True
-            
-
         if event.key == pygame.K_t or event.key == pygame.K_b:    # Tecla "t" Zoom in      # Tecla "b" Zoom out
             factor = 10 if state["g_pressed"] else 1.1
             if event.key == pygame.K_t:
@@ -89,6 +81,19 @@ def handle_input(event, state):
 ########################
 ####    Pantalla dreta
 ####
+####        General:
+        if event.key == pygame.K_c:    # Tecla "c"   neteja els plots pantalla dreta ((deixa els últims 10))
+            state["r_screen_clear"] = True
+
+        if event.key == pygame.K_x:    # Tecla "x"   neteja els plots "estroboscòpics" (segons la distáncia entre els punts)
+            state["r_screen_prune"] = True
+        if event.key == pygame.K_z:    # Tecla "z"   neteja els plots pantalla dreta (elimina el 50% dels punts)
+            state["r_screen_Zprune"] = True
+        
+
+        if event.key == pygame.K_f:    # Tecla "f"   mostra els vectors velocitat i acceleració durant els flaixos estroboscòpics
+            state["kin_show"] = True
+            
 ####        Posicions:
         if event.key == pygame.K_y or event.key == pygame.K_n:    # Tecla "y" Zoom in       # Tecla "n" Zoom out
             factor = 10 if state["g_pressed"] else 1.1
@@ -121,11 +126,11 @@ def handle_input(event, state):
 
             
     if event.type == pygame.KEYUP:
-        if event.key == pygame.K_g:      # Els Zooms magnifiquen en un factor x10 més
+        if event.key == pygame.K_g:      # Tecla "g": Els Zooms magnifiquen en un factor x10 més
             state["g_pressed"] = False
             
     if event.type == pygame.KEYUP:
-        if event.key == pygame.K_r:      # Les fletxes mouen la representació posició de la pantalla dreta
+        if event.key == pygame.K_r:      # Tecla "r": Les fletxes mouen la representació posició de la pantalla dreta
             state["r_pressed"] = False
 
     if event.type == pygame.KEYUP:

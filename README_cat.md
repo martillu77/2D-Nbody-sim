@@ -5,7 +5,7 @@ Aquest projecte està llicenciat sota la GNU General Public License v3.0.
 
 
 ---------------------------------------------------------------------
-RESUM: Aquest és un simulador 2D de N-partícules. Obre una finestra que es divideix en dues parts, l'esquerra on es mostra el "món" de la simulació en el moment "real" de la simulació, i una subfinestra a la dreta que mostra diferents resultats en intervals de temps constants com si una llum estroboscòpica capturés instantànies del sistema.
+RESUM: Aquest és un simulador 2D de N-partícules. Obre una finestra que es divideix en dues parts, l'esquerra on es mostra el "món" de la simulació en el moment "real" de la simulació, i a la dreta, enganxada a aquesta en una subfinestra, mostra diferents resultats en intervals de temps constants com si una llum estroboscòpica capturés instantànies del sistema.
 
 Objectiu: explorar de manera interactiva la dinàmica de sistemes de partícules amb o sense gravetat, diversos camps de força i col·lisions.
 

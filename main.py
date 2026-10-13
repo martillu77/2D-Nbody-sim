@@ -73,10 +73,14 @@ if resume_simulation:
 else:
     # Genera un disc de N particules dins d'un radi donat i petita rotació global (òmega):
     time = 0   # inicia el temps global de la simulacio. El que surt a la pantalla dreta es multiplica per config.TYPICAL_T
-    particles = Particle.generate_disk(N=3, center=(mid_x, mid_y), R=50, omega=0.02)
 
+    particles = [
+        Particle(x=mid_x, y=mid_y, vx=0.0, vy=0.0, ax=0., ay=0., m=100, cfr=0.5e-1),   # llavor al centre
+    ]
+    #particles.extend(Particle.generate_rotating_disk(N=5000, center=(mid_x, mid_y), R=150, omega=0.02, seed=config.SEED))   # 18:58:25 ---> 18:59:20
+    #particles.extend(Particle.generate_rotating_disk(N=5000, center=(mid_x, mid_y), R=150, omega=-0.02, seed=143))   # 18:58:25 ---> 18:59:20
 
-
+    particles.extend(Particle.generate_collapsing_cloud(N=500, center=(mid_x, mid_y), R_outer=150, cloud_mass=500, rotational_bias=0.5, omega=0.02, seed=config.SEED))
 
 # Partícules amb velocitats inicials i acceleracions
 #particles = [
@@ -149,9 +153,23 @@ if not resume_simulation:
 
     ##################
     # Estimació de pas de temps per la simulació (dt_sim) òptim. El paràmetre SIM_DT_PARAM (veure config.py) ajuda l'usuari a regular-lo.
-    accs, r = world.grav_acceleration(world.particles, dt=1)
+    if config.GPU:
+        accs, r = world.grav_acceleration_gpu(world.particles, dt=1, allow_fusion=False)
+    else:
+        accs, r = world.grav_acceleration_cpu(world.particles, dt=1, allow_fusion=False)
+    #
+
+    a_max = 0.0
+    for p, (ax, ay) in zip(world.particles, accs):
+        ax += p.ax + world.const_ax
+        ay += p.ay + world.const_ay
+        a = math.hypot(ax, ay)
+        if a > a_max:
+            a_max = a
+
+    #a_max = max(math.hypot(ax, ay) for ax, ay in accs)
+
     v_max = max(math.hypot(p.vx, p.vy) for p in world.particles)
-    a_max = max(math.hypot(ax, ay) for ax, ay in accs)
     r_min = min(p.cfr for p in world.particles)
 
     dt_sim = config.SIM_DT_PARAM * min(
@@ -173,16 +191,14 @@ if not resume_simulation:
 world.set_dt_sim(dt_sim)    # set dt_sim in world
 
 
-
-
-
 if config.GRAVITY:
-    # Gravetat:
-    world.add_gravity(dt_sim)
+    world.add_gravity(dt_sim)                 # Gravitació universal de Newton
 else:
-    # Camp global                   x:   y:
-    world.add_constant_acceleration(0.0, 9.8)   # Descomenta per produir un camp de força global d'acceleració constant per tota partícula
+    world.add_constant_acceleration(0.0, 9.8) # Produeix un camp de força global d'acceleració constant per tota partícula
 
+# In theory this is also possible (in this *strict* order):
+#world.add_constant_acceleration(0.0, 9.8)   # Produeix un camp de força global d'acceleració constant per tota partícula
+#world.add_gravity(dt_sim)                   # Gravitació universal de Newton
 
 
 
@@ -254,6 +270,7 @@ while running:
     # Calcula el següent pas:
     if not state["paused"]:
         running = world.update(dt_sim)
+        #print("World was updated")
         if not running:
             running = False
 #            print("Fora de limits: surt")
@@ -265,44 +282,47 @@ while running:
     # --- Sampling ---
     # Decideix si hi ha d'haver un flaix estroboscopic:
     if sampler.trigger(dt_sim, dt_real):
-        sampler.update(world.particles)       # Guarda les dades de l'estat actual (per despres ser mostrades a la pantalla de la dreta)
+        sampler.update(world.particles)       # Guarda les dades de l'estat actual (per despres ser mostrades a la pantalla dreta)
 #        if not state["kin_show"]:
 #            state["kin_show"] = False
         flash_timer = config.DT_FLASH         # Duració flaix. Si dt_real = 0.016 i flash_timer?0.1 => el flaix dura uns 6 frames
 
-    show_vectors = (flash_timer > 0) and state["kin_show"]
-    show_vectors = state["kin_show"]
+
+    #show_vectors = (flash_timer > 0) and state["kin_show"] and config.SHOW
+    show_vectors = state["kin_show"] and config.SHOW
     #print("      .")
 
     # --- Dibuix ---
 #    screen.fill((20, 20, 20))
 
-    # zona esquerra
-    left_surface = pygame.Surface((config.LEFT_WIDTH, config.HEIGHT))
-    left_surface.fill((50, 50, 50))
+    if config.SHOW:
+        # zona esquerra
+        left_surface = pygame.Surface((config.LEFT_WIDTH, config.HEIGHT))
+        left_surface.fill((50, 50, 50))
 
-    # Particules (cercle)
-    draw_particles(left_surface, world, world.particles, show_vectors)
+        # Particules (cercle)
+        draw_particles(left_surface, world, world.particles, show_vectors)
+        ####print(f"\nParticules dibuixades. Temps: {config.TYPICAL_T*time} {time} {len(sampler.data)} \n")
 
-    # flash
-    if flash_timer > 0:
-        overlay = pygame.Surface((config.LEFT_WIDTH, config.HEIGHT), pygame.SRCALPHA)
-        overlay.fill((255,255,255,120))
-        left_surface.blit(overlay, (0,0))
-        flash_timer -= dt_real
+        # flash
+        if flash_timer > 0:
+            overlay = pygame.Surface((config.LEFT_WIDTH, config.HEIGHT), pygame.SRCALPHA)
+            overlay.fill((255,255,255,120))
+            left_surface.blit(overlay, (0,0))
+            flash_timer -= dt_real
 
-    screen.blit(left_surface, (0,0))
+        screen.blit(left_surface, (0,0))
 
-    # separador
-    pygame.draw.line(screen, (200,200,200), (config.LEFT_WIDTH, 0), (config.LEFT_WIDTH, config.HEIGHT), 2)
+        # separador
+        pygame.draw.line(screen, (200,200,200), (config.LEFT_WIDTH, 0), (config.LEFT_WIDTH, config.HEIGHT), 2)
 
-    # zona dreta (plots)
-    right_surface = pygame.Surface((config.RIGHT_WIDTH, config.HEIGHT))
-    draw_plots(right_surface, sampler.data, font)
+        # zona dreta (plots)
+        right_surface = pygame.Surface((config.RIGHT_WIDTH, config.HEIGHT))
+        draw_plots(right_surface, sampler.data, font)
     
-    screen.blit(right_surface, (config.LEFT_WIDTH, 0))
+        screen.blit(right_surface, (config.LEFT_WIDTH, 0))
 
-    pygame.display.flip()
+        pygame.display.flip()
 
 pygame.quit()
 sys.exit()

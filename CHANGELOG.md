@@ -4,6 +4,26 @@ This project is licensed under the GNU General Public License v3.0.
 
 Contact: lluis.marti_at_gmx.net
 
+
+#######################################
+##   VERSION			v.1.1.0      ##
+#######################################
+
+Removed one remaining non-essential N^2 loop and left the only one needed for an "exact" simulation
+Besides the already existing "generate_rotating_disk" method to initialise particle settings 3 new methods were added:
+	- generate_proto_disc                  : massive central mass + keplerian velocity and log-normal masses distrib.
+	- generate_collapsing_cloud            : no massive mass + all masses equal + no keplerian velocities
+	- generate_collapsing_cloud_lognormal  : basically same as previous but with with log-normal masses distrib.
+If GPU is available, calculations are done there using PyTorch (needs to be installed). Note: for now if you try to
+simulate too many particiles it will crash
+Corrected bug in kinetic energy calculation during collisions.
+
+#######################################
+##   VERSION			v.1.0.1      ##
+#######################################
+
+Removed an unnecessary N^2 loop for the Verlet integrator
+
 #######################################
 ##   VERSION			v.1.0.0      ##
 #######################################
@@ -11,13 +31,14 @@ Contact: lluis.marti_at_gmx.net
 
 Version v.1.0.0 summary:
 
-Added the possibility to save the simulation with the S key. The name of the directory where the simulation is saved is shown in the terminal, and the simulation can be resumed later.
+Added the possibility to save the simulation with the "s" key. The name of the directory where the simulation is saved is shown in the terminal, and the simulation can be resumed later.
 For more details see the README.md file.
 Other simulation parameters are also saved along with the simulation state.
-
+Other minor bugs corrected, eg.:
+	kinetic energy in collisions
 
 ################################################################################
-Version v.0.2.0 summary:
+## Version v.0.2.0 summary:
 
 --------------------------
 * Scaling and Units:

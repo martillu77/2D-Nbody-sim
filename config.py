@@ -37,6 +37,7 @@ FPS = 60
 DT_SAMPLE = 2.            # Real time between stroboscopic snapshots
 DT_FLASH = 0.1            # Duration of the flash (real time)
 PARTICLE_RAD = 0.1        # Particle radius on screen (not physical). See draw.py (currently unused)
+SHOW = True               # Show the simulation window (True) or not (False). Can be changed with the "a" key during runtime. 
 
 # Particle configuration:
 PART_CFR = 0.1            # Contact interaction radius (in simulation units). Can be overridden in particle definition
@@ -47,11 +48,11 @@ SEED = 42                 # When creating particles properly randomize (None) or
 
 # "World" configuration:
 INTEGRATOR = "verlet"     # Integrators (from worse to better): "euler", "cromer", "verlet" 
-SIM_DT_PARAM = 0.01       # [t]   Simulation timestep factor (smaller means smaller timestep)
-SIM_DT_MAX = 1.0e+5       # [1/t] Simulation timestep MAXIMUM (to avoid too slow simulations).
+SIM_DT_PARAM = 0.1       # [t]   Simulation timestep factor (smaller means smaller timestep)
+SIM_DT_MAX = 1.0e+4       # [1/t] Simulation timestep MAXIMUM (to avoid too slow simulations).
                           #         This may override SIM_DT_PARAM
 
-GRAVITY = True            # Is there a gravitional field or just a force field (defined in particles)
+GRAVITY = True            # Is there a gravitional field or just a force field (defined in particles from main.py)
 GRAV_G = 1                # 4*100*math.pi**2    # Gravitational constant (G = 0 disables gravity)
 
 WALLS = False    # If True, particles bounce off boundaries
@@ -62,6 +63,8 @@ BOUNDS = None    # = None or True
                  #   if WALLS = False → simulation stops when a particle exits
 
                  # NOTE: WALLS = True && BOUNDS = None is equivalent to WALLS = False
+
+GPU = True               # Use GPU for calculations
 
 def init():
     print("")

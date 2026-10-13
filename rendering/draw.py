@@ -12,7 +12,11 @@ import config
 def draw_particles(left_surface, world, particles, show_vectors=False):
     accs = []
     if show_vectors:
-        accs, r = world.grav_acceleration(world.particles, dt=1)
+        
+        if config.GPU:
+            accs, r = world.grav_acceleration_gpu(world.particles, dt=1, allow_fusion=False)
+        else:
+            accs, r = world.grav_acceleration_cpu(world.particles, dt=1, allow_fusion=False)
         
         v_max = max(math.hypot(p.vx, p.vy) for p in particles)
         a_max = max(math.hypot(ax, ay) for ax, ay in accs)
