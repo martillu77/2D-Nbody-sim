@@ -62,6 +62,10 @@ Amb la tecla S es pot guardar la configuració actual de partícules i altres va
 ## LIMITACIONS (conegudes i en qualsevol cas incompleta)
 
 - Simulació 2D
+- GPU però amb limitació de nombre de partícules
+- Alguns llaços d'ordre N no necessaris a world.
+- Seria interessant mostrar la distribució de masses segons corre la simulació
+
 - No conserva exactament l’energia (depèn de l’integrador i del pas de temps escollit)
 - Les col·lisions i fusions són aproximacions
 - No es modela l’estructura interna dels cossos ni efectes associats:
@@ -115,8 +119,9 @@ project/
 - `U` — Apropa la vista.
 - `M` — Allunya la vista.
 
-### Zoom
+### Zoom i altres
 - Mantén premut `G` — Augmenta o redueix el zoom per un factor 10 en lloc del factor normal.
+- `A` — No mostris la simulació per pantalla (accelera la simulació)
 
 ### Punts estroboscòpics
 - `C` — Esborra els punts estroboscòpics, conservant-ne els 10 últims.

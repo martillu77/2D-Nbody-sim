@@ -74,16 +74,16 @@ else:
     # Genera un disc de N particules dins d'un radi donat i petita rotació global (òmega):
     time = 0   # inicia el temps global de la simulacio. El que surt a la pantalla dreta es multiplica per config.TYPICAL_T
 
+    ########################################################################
+    # Canvia el que hi ha sota per generar diferents escenaris de simulació:
+
     particles = [
         Particle(x=mid_x, y=mid_y, vx=0.0, vy=0.0, ax=0., ay=0., m=100, cfr=0.5e-1),   # llavor al centre
     ]
-    #particles.extend(Particle.generate_rotating_disk(N=5000, center=(mid_x, mid_y), R=150, omega=0.02, seed=config.SEED))   # 18:58:25 ---> 18:59:20
-    #particles.extend(Particle.generate_rotating_disk(N=5000, center=(mid_x, mid_y), R=150, omega=-0.02, seed=143))   # 18:58:25 ---> 18:59:20
-
     particles.extend(Particle.generate_collapsing_cloud(N=500, center=(mid_x, mid_y), R_outer=150, cloud_mass=500, rotational_bias=0.5, omega=0.02, seed=config.SEED))
 
-# Partícules amb velocitats inicials i acceleracions
-#particles = [
+    # Partícules amb velocitats inicials i acceleracions
+#    particles = [
 #    Particle(x=mid_x,       y=mid_y, vx=0, vy=2.,  m=200),          # Estel-1
 #    Particle(x=mid_x+11.,   y=mid_y, vx=0, vy=-4.,  m=100) #,         # Estel-2
 ##    Particle(x=mid_x,       y=mid_y, vx=0, vy=2.14,  m=100),         # Estel-1
@@ -92,54 +92,54 @@ else:
 
 
 
-# Terra - Lluna - Coet:
-#r0 = 0.001
-#v_circ = math.sqrt(config.GRAV_G*3.0e-6/r0)
-#v_esc  = math.sqrt(2*config.GRAV_G*3.0e-6/r0)
+    # Terra - Lluna - Coet:
+    #r0 = 0.001
+    #v_circ = math.sqrt(config.GRAV_G*3.0e-6/r0)
+    #v_esc  = math.sqrt(2*config.GRAV_G*3.0e-6/r0)
 
-#v0 = 0.9825 * v_esc   # ajusta entre 0.9–1.0
-#rocket_theta = 90.
+    #v0 = 0.9825 * v_esc   # ajusta entre 0.9–1.0
+    #rocket_theta = 90.
 
-#moon_dist = 0.0257
-#moon_angle = 292.
+    #moon_dist = 0.0257
+    #moon_angle = 292.
 
-#particles = [
-#    Particle( x=mid_x, y=mid_y,
-#    vx= (3.69e-8/3.0e-6)*math.sqrt(config.GRAV_G*3.0e-6/0.0257)*math.sin(moon_angle*math.pi/180.0),
-#    vy=-(3.69e-8/3.0e-6)*math.sqrt(config.GRAV_G*3.0e-6/0.0257)*math.cos(moon_angle*math.pi/180.0),
-#    m=3.0e-6, cfr=0.5e-1),       # Terra
+    #particles = [
+    #    Particle( x=mid_x, y=mid_y,
+    #    vx= (3.69e-8/3.0e-6)*math.sqrt(config.GRAV_G*3.0e-6/0.0257)*math.sin(moon_angle*math.pi/180.0),
+    #    vy=-(3.69e-8/3.0e-6)*math.sqrt(config.GRAV_G*3.0e-6/0.0257)*math.cos(moon_angle*math.pi/180.0),
+    #    m=3.0e-6, cfr=0.5e-1),       # Terra
 
-#    Particle(
-#    x=mid_x+ moon_dist*math.cos(moon_angle*math.pi/180.0),
-#    y=mid_y+ moon_dist*math.sin(moon_angle*math.pi/180.0),
-#    vx=-math.sqrt(config.GRAV_G*3.0e-6/moon_dist)*math.sin(moon_angle*math.pi/180.0),
-#    vy= math.sqrt(config.GRAV_G*3.0e-6/moon_dist)*math.cos(moon_angle*math.pi/180.0),
-#    m=3.69e-8, cfr=0.5e-1), # Lluna
+    #    Particle(
+    #    x=mid_x+ moon_dist*math.cos(moon_angle*math.pi/180.0),
+    #    y=mid_y+ moon_dist*math.sin(moon_angle*math.pi/180.0),
+    #    vx=-math.sqrt(config.GRAV_G*3.0e-6/moon_dist)*math.sin(moon_angle*math.pi/180.0),
+    #    vy= math.sqrt(config.GRAV_G*3.0e-6/moon_dist)*math.cos(moon_angle*math.pi/180.0),
+    #    m=3.69e-8, cfr=0.5e-1), # Lluna
 
-#    Particle(
-#    x=mid_x-r0,
-#    y=mid_y,
-#    vx=v0*math.cos(rocket_theta*math.pi/180),
-#    vy=-v0*math.sin(rocket_theta*math.pi/180),
-#    m=1.0e-26, cfr=0.5e-1)  # Coet
-#]
+    #    Particle(
+    #    x=mid_x-r0,
+    #    y=mid_y,
+    #    vx=v0*math.cos(rocket_theta*math.pi/180),
+    #    vy=-v0*math.sin(rocket_theta*math.pi/180),
+    #    m=1.0e-26, cfr=0.5e-1)  # Coet
+    #]
 
 
 
-# Sistema solar:
-#particles = [
-#    Particle(x=mid_x,           y=mid_y, vx=0, vy=0.,                               m=1),         # Sol
-#    Particle(x=mid_x+3.9,       y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/3.9),     m=1.65e-7),   # Mercuri
-#    Particle(x=mid_x+7.2,       y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/7.2),     m=2.45e-6),   # Venus
-#    Particle(x=mid_x+10.0,      y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/10.0),    m=3.0e-6),    # Terra
-##    Particle(x=mid_x + 10.0257, y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/10.0) + math.sqrt(config.GRAV_G*3.0e-6/0.0257), m=3.69e-8) # Lluna
-##    Particle(x=mid_x+10.0,  y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/10.0),    m=0.0123*3.0e-6),    # Terra
-#    Particle(x=mid_x+15.2,  y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/15.2),    m=3.2e-7),    # Mart
-#    Particle(x=mid_x+52.0,  y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/52),      m=9.5e-4),    # Jupiter
-#    Particle(x=mid_x+95.8,  y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/95.8),    m=2.86e-4),   # Saturn
-#    Particle(x=mid_x+192.,  y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/192),     m=4.4e-5),    # Urà
-#    Particle(x=mid_x+300.5, y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/300.5),   m=5.1e-5)     # Neptú
-#]
+    # Sistema solar:
+    #particles = [
+    #    Particle(x=mid_x,           y=mid_y, vx=0, vy=0.,                               m=1),         # Sol
+    #    Particle(x=mid_x+3.9,       y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/3.9),     m=1.65e-7),   # Mercuri
+    #    Particle(x=mid_x+7.2,       y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/7.2),     m=2.45e-6),   # Venus
+    #    Particle(x=mid_x+10.0,      y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/10.0),    m=3.0e-6),    # Terra
+    ##    Particle(x=mid_x + 10.0257, y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/10.0) + math.sqrt(config.GRAV_G*3.0e-6/0.0257), m=3.69e-8) # Lluna
+    ##    Particle(x=mid_x+10.0,  y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/10.0),    m=0.0123*3.0e-6),    # Terra
+    #    Particle(x=mid_x+15.2,  y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/15.2),    m=3.2e-7),    # Mart
+    #    Particle(x=mid_x+52.0,  y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/52),      m=9.5e-4),    # Jupiter
+    #    Particle(x=mid_x+95.8,  y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/95.8),    m=2.86e-4),   # Saturn
+    #    Particle(x=mid_x+192.,  y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/192),     m=4.4e-5),    # Urà
+    #    Particle(x=mid_x+300.5, y=mid_y, vx=0, vy=math.sqrt(config.GRAV_G/300.5),   m=5.1e-5)     # Neptú
+    #]
 
 if not resume_simulation:
     # Recalculate particle values (pos, vel, size, mass) with more natural units:
@@ -178,13 +178,13 @@ if not resume_simulation:
     #    math.sqrt(r_min**3/config.TYPICAL_M)
         )
     if dt_sim < 1/config.SIM_DT_MAX:
-        print(f"ATTENTION: dt_sim too small ({dt_sim:.3e}) changed to SIM_DT_MAX {1/config.SIM_DT_MAX}. Value overriden. Please, check.")
+        print(f"ATTENTION: dt_sim too small ({dt_sim:.4e}) changed to SIM_DT_MAX {1/config.SIM_DT_MAX}. Value overriden. Please, check.")
         dt_sim = 1/config.SIM_DT_MAX
 
     
     print(f"v_max: {v_max:.3e}    r_min: {r_min:.3e}")
     DT = dt_sim                         # Guarda dt_sim (simulation time step) per quan fas pausa
-    print(f"Simulation time step {dt_sim:.3e} (1/{int(1/dt_sim):.3e})")
+    print(f"Simulation time step {dt_sim:.4e} (1/{int(1/dt_sim):.4e})")
     #print(f"Pas de temps de simulació {dt_sim:.3e} (1/{int(1/dt_sim)})")
     ##################
 

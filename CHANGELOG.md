@@ -5,6 +5,18 @@ This project is licensed under the GNU General Public License v3.0.
 Contact: lluis.marti_at_gmx.net
 
 
+
+#######################################
+##   VERSION			v.1.1.1      ##
+#######################################
+
+Rotational_bias did not generate a global rotation in "generate_collapsing_cloud" and "generate_collapsing_cloud_lognormal". This is now corrected.
+
+Other small changes/improvements:
+   - Checks for incoming parameters of particle generating modules
+   - Random generator usage and seed set valid in the particle generating modules AND not affecting other parts of the code (if implemented)
+   - Remove a non-essential N loop (small but still an improvement) for Verlet integrator in the half-step of the velocities and updating positions 
+
 #######################################
 ##   VERSION			v.1.1.0      ##
 #######################################

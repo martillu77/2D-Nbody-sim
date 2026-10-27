@@ -532,17 +532,19 @@ class World:
 #            print("Verlet")
             v_max = 0.
             r_min = float('inf')
-            # 1. mig pas velocitat
+            # 1. mig pas velocitat i actualitza posicions: O(N)
             for p, (ax, ay) in zip(self.particles, accs):
                 ax += p.ax + self.const_ax    # acceleracio gravetat += propia + camp global
                 ay += p.ay + self.const_ay    # acceleracio gravetat += propia + camp global
                 p.vx += 0.5 * ax * dt
                 p.vy += 0.5 * ay * dt
-                
-            # actualitza posicions:    O(N)
-            for p, (ax, ay) in zip(self.particles, accs):
                 p.x += p.vx * dt #+ (0.5*ax*dt*dt)
                 p.y += p.vy * dt #+ (0.5*ay*dt*dt)
+
+#            # actualitza posicions:    O(N)
+#            for p, (ax, ay) in zip(self.particles, accs):
+#                p.x += p.vx * dt #+ (0.5*ax*dt*dt)
+#                p.y += p.vy * dt #+ (0.5*ay*dt*dt)
 
 
 

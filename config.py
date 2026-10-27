@@ -34,8 +34,8 @@ RIGHT_VY = 0
 
 # General visualization parameters
 FPS = 60             
-DT_SAMPLE = 2.            # Real time between stroboscopic snapshots
-DT_FLASH = 0.1            # Duration of the flash (real time)
+DT_SAMPLE = 0.2            # Real time between stroboscopic snapshots
+DT_FLASH = 0.05            # Duration of the flash (real time)
 PARTICLE_RAD = 0.1        # Particle radius on screen (not physical). See draw.py (currently unused)
 SHOW = True               # Show the simulation window (True) or not (False). Can be changed with the "a" key during runtime. 
 
